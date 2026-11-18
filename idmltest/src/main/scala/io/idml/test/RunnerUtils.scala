@@ -17,7 +17,7 @@ import io.idml.utils.configuration.Pipeline
 import fs2._
 import Test._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 class UnbalancedMultiTest(s: String) extends Throwable(s)
@@ -74,7 +74,7 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
       }.rethrow
     })
 
-  def runMulti(implicit timer: ContextShift[IO])
+  def runMulti
       : (Option[Long], Either[String, PipelinedCode[String]], List[Json]) => IO[List[Json]] =
     run({ (m: Mapping, js: List[Json]) =>
       js.parTraverse { j =>
@@ -104,8 +104,7 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
   case class DifferentOutput(name: String, diff: String)
 
   trait IdmlUtils[T] {
-    def run(implicit
-        timer: ContextShift[IO]): (Option[Long], Either[String, PipelinedCode[String]], T) => IO[T]
+    def run: (Option[Long], Either[String, PipelinedCode[String]], T) => IO[T]
     def toString(t: T): String
     def validate(t: ResolvedTest[T]): Either[Throwable, ResolvedTest[T]]
     def inspectOutput(
@@ -116,10 +115,10 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
   object IdmlUtils   {
     def apply[T: IdmlUtils]: IdmlUtils[T] = implicitly
   }
-  implicit val singleIdmlRun = new IdmlUtils[Json] {
-    override def run(implicit timer: ContextShift[IO]) = runSingle
-    override def toString(t: Json)                     = spaces2butDropNulls.print(t)
-    override def validate(t: ResolvedTest[Json])       = Right(t)
+  implicit val singleIdmlRun: IdmlUtils[Json] = new IdmlUtils[Json] {
+    override def run                                                                    = runSingle
+    override def toString(t: Json)                                                      = spaces2butDropNulls.print(t)
+    override def validate(t: ResolvedTest[Json]): Either[Throwable, ResolvedTest[Json]] = Right(t)
     override def inspectOutput(
         resolved: ResolvedTest[Json],
         output: Json,
@@ -134,10 +133,11 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
       )
 
   }
-  implicit val multiIdmlRun = new IdmlUtils[List[Json]] {
-    override def run(implicit timer: ContextShift[IO]) = runMulti
-    override def toString(t: List[Json])               = spaces2butDropNulls.print(Json.arr(t: _*))
-    override def validate(t: ResolvedTest[List[Json]]) =
+  implicit val multiIdmlRun: IdmlUtils[List[Json]] = new IdmlUtils[List[Json]] {
+    override def run                     = runMulti
+    override def toString(t: List[Json]) = spaces2butDropNulls.print(Json.arr(t: _*))
+    override def validate(
+        t: ResolvedTest[List[Json]]): Either[Throwable, ResolvedTest[List[Json]]] =
       Either.cond(
         t.input.size == t.output.size,
         t,

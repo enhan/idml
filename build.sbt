@@ -49,7 +49,7 @@ lazy val commonSettings = Seq(
       email = "teamrobin@meltwater.com",
       url = uri("https://meltwater.com"))
   ),
-  scalacOptions ++= Seq("-release:17", "-Ymacro-annotations"),
+  scalacOptions ++= Seq("-release:17", "-Xsource:3"),
   Docker / version          := version.value,
   Docker / dockerUsername   := Some("idml"),
   dockerBaseImage           := "eclipse-temurin:17-jre", // pin: native-packager default follows the latest LTS

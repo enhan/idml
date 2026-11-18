@@ -2,7 +2,8 @@ package io.idml.test
 
 import cats.implicits._
 import java.nio.file.Paths
-import cats.effect.{Blocker, ExitCode, IO, Resource}
+import cats.effect.{ExitCode, IO, Resource}
+import cats.effect.unsafe.implicits.global
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.literal.JsonStringContext
@@ -11,15 +12,13 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.global
 
 class MainSpec extends AnyWordSpec with must.Matchers with CirceEitherEncoders {
-  implicit val cs = IO.contextShift(global)
-  class TestRunner(b: Blocker) extends Runner(false, None, true, b) {
+  class TestRunner extends Runner(false, None, true) {
     val printed                          = mutable.Buffer.empty[String]
     override def print(a: Any): IO[Unit] = IO { printed.append(a.toString) }
   }
-  val runner: Resource[IO, TestRunner] = Blocker[IO].map { b => new TestRunner(b) }
+  val runner: Resource[IO, TestRunner] = Resource.eval(IO(new TestRunner))
   "Main" should {
     "run a real test and translate it's exit code" in {
       val test = Paths.get(getClass.getResource("/tests/basic.json").getFile)

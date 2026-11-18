@@ -4,7 +4,7 @@ enablePlugins(UniversalPlugin)
 
 
 libraryDependencies ++= List(
-  "com.monovore" %% "decline" % "1.4.0",
+  "com.monovore" %% "decline" % "2.6.2",
 )
 
 Compile / mainClass := Some("io.idml.tool.IdmlTool")

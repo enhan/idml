@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 /** The top level exec node. The only requirement is that it can be invoked */
 trait Node {
-  def invoke(ctx: IdmlContext)
+  def invoke(ctx: IdmlContext): Unit
 
   /** Call invoke in a closed context. Useful for pipls */
   def eval(ctx: IdmlContext): IdmlValue = {
@@ -35,7 +35,7 @@ trait Node {
 case class Document(blocks: Map[String, Block]) extends Node {
   val main = blocks.getOrElse(Document.Main, throw new IllegalArgumentException("missing main"))
 
-  override def invoke(ctx: IdmlContext) {
+  override def invoke(ctx: IdmlContext): Unit = {
     main.invoke(ctx)
   }
 }
@@ -50,7 +50,7 @@ object Document {
 
 /** A reusable code block */
 case class Block(name: String, rules: List[Rule]) extends Node {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     rules foreach (_.invoke(ctx))
   }
 }
@@ -84,14 +84,14 @@ trait Expression extends Node
 
 /** Execute a literal expression */
 case class Literal(value: IdmlValue) extends Node {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.cursor = value
   }
 }
 
 /** Navigate to an object field */
 case class Field(name: String) extends Expression {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.enterPath(this)
     ctx.cursor = ctx.cursor.get(name)
     ctx.exitPath(this)
@@ -100,21 +100,21 @@ case class Field(name: String) extends Expression {
 
 /** Expressions like **.x mean "find 'x' at any depth" */
 case object AnyExpr extends Expression {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ???
   }
 }
 
 /** Expressions like [n, m] slice an array */
 case class Slice(from: Option[Int], to: Option[Int]) extends Expression {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.cursor = ctx.cursor.slice(from, to)
   }
 }
 
 /** Expressions like [n] retrieve a single item from an array */
 case class Index(index: Int) extends Expression {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.cursor = ctx.cursor.get(index)
   }
 }

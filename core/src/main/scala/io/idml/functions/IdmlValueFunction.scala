@@ -40,7 +40,7 @@ case class IdmlValueFunction(method: Method, args: List[Pipeline], isNAry: Boole
   )
 
   /** Evaluate the current runtime values of the arguments and pass them to the method handle */
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     val r           = args.map(_.eval(ctx))
     val runtimeArgs = if (isNAry) Seq(r) else r
 

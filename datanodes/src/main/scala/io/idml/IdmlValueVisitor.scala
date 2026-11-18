@@ -3,31 +3,31 @@ package io.idml
 /** Allows traversal of a IdmlValue using the visitor pattern */
 abstract class IdmlValueVisitor {
 
-  def visitObject(path: Seq[String], obj: IdmlObject) {
+  def visitObject(path: Seq[String], obj: IdmlObject): Unit = {
     obj.fields.foreach { case (key, value) =>
       visitValue(path :+ key, value)
     }
   }
 
-  def visitArray(path: Seq[String], array: IdmlArray) {
+  def visitArray(path: Seq[String], array: IdmlArray): Unit = {
     array.items.foreach { case value: Any =>
       visitValue(path, value)
     }
   }
 
-  def visitNothing(path: Seq[String], n: IdmlNothing) {}
+  def visitNothing(path: Seq[String], n: IdmlNothing): Unit = {}
 
-  def visitString(path: Seq[String], s: IdmlString) {}
+  def visitString(path: Seq[String], s: IdmlString): Unit = {}
 
-  def visitDouble(path: Seq[String], d: IdmlDouble) {}
+  def visitDouble(path: Seq[String], d: IdmlDouble): Unit = {}
 
-  def visitInt(path: Seq[String], i: IdmlInt) {}
+  def visitInt(path: Seq[String], i: IdmlInt): Unit = {}
 
-  def visitBool(path: Seq[String], b: IdmlBool) {}
+  def visitBool(path: Seq[String], b: IdmlBool): Unit = {}
 
-  def visitNull(path: Seq[String]) {}
+  def visitNull(path: Seq[String]): Unit = {}
 
-  def visitPrimitive(path: Seq[String], value: IdmlValue) {
+  def visitPrimitive(path: Seq[String], value: IdmlValue): Unit = {
     value match {
       case v: IdmlString => visitString(path, v)
       case v: IdmlDouble => visitDouble(path, v)
@@ -37,11 +37,11 @@ abstract class IdmlValueVisitor {
     }
   }
 
-  def visitIndexValue(path: Seq[String], index: Int, value: IdmlValue) {
+  def visitIndexValue(path: Seq[String], index: Int, value: IdmlValue): Unit = {
     visitValue(path, value)
   }
 
-  def visitValue(path: Seq[String], value: IdmlValue) {
+  def visitValue(path: Seq[String], value: IdmlValue): Unit = {
     value match {
       case o: IdmlObject  => visitObject(path, o)
       case a: IdmlArray   => visitArray(path, a)
@@ -50,7 +50,7 @@ abstract class IdmlValueVisitor {
     }
   }
 
-  def visitValue(value: IdmlValue) {
+  def visitValue(value: IdmlValue): Unit = {
     visitValue(Vector(), value)
   }
 }

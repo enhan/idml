@@ -14,20 +14,21 @@ import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 object Main extends IOApp {
-  implicit val urlArgument     = new Argument[URL] {
+  implicit val urlArgument: Argument[URL]         = new Argument[URL] {
     override def read(string: String): ValidatedNel[String, URL] =
       Try {
         new URL(string)
       }.toEither.leftMap(_.getMessage).toValidatedNel
     override def defaultMetavar: String                          = "URL"
   }
-  implicit val patternArgument = new Argument[Pattern] {
-    override def read(string: String): ValidatedNel[String, Pattern] =
-      Try {
-        Pattern.compile(string)
-      }.toEither.leftMap(_.getMessage).toValidatedNel
-    override def defaultMetavar: String                              = "pattern"
-  }
+  implicit val patternArgument: Argument[Pattern] =
+    new Argument[Pattern] {
+      override def read(string: String): ValidatedNel[String, Pattern] =
+        Try {
+          Pattern.compile(string)
+        }.toEither.leftMap(_.getMessage).toValidatedNel
+      override def defaultMetavar: String                              = "pattern"
+    }
 
   val arg      = Opts.arguments[Path]("test.json")
   val filter   = Opts
@@ -62,28 +63,17 @@ object Main extends IOApp {
   def execute(injectedRunner: Option[Runner] = None): Command[IO[ExitCode]] =
     command.map {
       case (paths, filter, update, failures, dynamic, plugins, noReport, jdiff, threads) =>
-        val cs: Resource[IO, (ContextShift[IO], Blocker)] = {
-          val pools = threads
-            .map(n =>
-              Resource.make(IO { Executors.newFixedThreadPool(n) })(p => IO { p.shutdown() }).map {
-                p =>
-                  val ec: ExecutionContext = ExecutionContext.fromExecutor(p)
-                  IO.contextShift(ec)
-              })
-            .getOrElse(Resource.eval(IO {
-              IO.contextShift(ExecutionContext.global)
-            }))
-          (pools, Blocker[IO]).tupled
-        }
-        cs.use { case (c, b) =>
-          implicit val ics: ContextShift[IO] = c
-          val runner                         = injectedRunner.getOrElse(new Runner(dynamic, plugins, jdiff, b)(c))
-          for {
-            results <- if (update) paths.traverse(runner.updateTest(failures, filter)(c))
-                       else paths.traverse(runner.runTest(failures, filter)(c))
-            results2 = results.toList.flatten
-            _       <- noReport.pure[IO].ifM(IO.unit, runner.report(results2))
-          } yield TestState.toExitCode(results2.combineAll)
+        val runner  = injectedRunner.getOrElse(new Runner(dynamic, plugins, jdiff))
+        val program = for {
+          results <- if (update) paths.traverse(runner.updateTest(failures, filter))
+                     else paths.traverse(runner.runTest(failures, filter))
+          results2 = results.toList.flatten
+          _       <- noReport.pure[IO].ifM(IO.unit, runner.report(results2))
+        } yield TestState.toExitCode(results2.combineAll)
+        threads.fold(program) { n =>
+          Resource
+            .make(IO(Executors.newFixedThreadPool(n)))(p => IO(p.shutdown()))
+            .use(p => program.evalOn(ExecutionContext.fromExecutor(p)))
         }
     }
 }

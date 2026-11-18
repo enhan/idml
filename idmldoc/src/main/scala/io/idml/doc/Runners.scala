@@ -3,7 +3,6 @@ package io.idml.doc
 import cats.effect._
 import cats.effect.implicits._
 import cats._
-import cats.effect.concurrent.Ref
 import cats.implicits._
 import io.idml.circe.IdmlCirce
 import io.idml.datanodes.IObject
@@ -17,7 +16,7 @@ object Runners {
     def run(block: Code): F[List[Node]]
   }
 
-  def run[F[_]: Monad: Applicative: Effect](markdown: List[Node]): F[List[Node]] =
+  def run[F[_]: Sync](markdown: List[Node]): F[List[Node]] =
     idmlRunner[F].flatMap { r =>
       markdown
         .traverse {
@@ -27,7 +26,7 @@ object Runners {
         .map(_.flatten)
     }
 
-  def idmlRunner[F[_]: Monad: Applicative](implicit F: Effect[F]): F[Runner[F]] =
+  def idmlRunner[F[_]](implicit F: Sync[F]): F[Runner[F]] =
     for {
       idml  <- F.delay { Idml.autoBuilder().build() }
       input <- Ref[F].of(IdmlJson.newObject())

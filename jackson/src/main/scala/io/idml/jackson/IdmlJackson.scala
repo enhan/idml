@@ -10,7 +10,7 @@ import io.idml.jackson.serder.IdmlJacksonModule
 /** The Idml json module. Usually you can just use IdmlJson */
 class IdmlJackson(mapper: ObjectMapper) extends IdmlJson {
 
-  def this() {
+  def this() = {
     this(IdmlJackson.newDefaultObjectMapper)
   }
 

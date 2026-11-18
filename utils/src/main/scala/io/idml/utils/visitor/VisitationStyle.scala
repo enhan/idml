@@ -4,8 +4,8 @@ package io.idml.utils.visitor
 trait VisitationStyle {
   this: ExecNodeVisitor =>
 
-  def visitDoc(ctx: ExecDocContext)
-  def visitBlockInvoke(ctx: ExecBlockInvokeContext)
+  def visitDoc(ctx: ExecDocContext): Unit
+  def visitBlockInvoke(ctx: ExecBlockInvokeContext): Unit
 }
 
 /** Visit things in the order that they are called, discovering all the paths the interpreter could
@@ -15,12 +15,12 @@ trait ExecutionOrderVisitationStyle extends VisitationStyle {
   this: ExecNodeVisitor =>
 
   /** Visit the main block and expect apply() to call the others */
-  def visitDoc(ctx: ExecDocContext) {
+  def visitDoc(ctx: ExecDocContext): Unit = {
     visitBlock(ExecBlockContext(ctx.doc.main, ctx))
   }
 
   /** Visit an apply method, potentially calling */
-  def visitBlockInvoke(ctx: ExecBlockInvokeContext) {
+  def visitBlockInvoke(ctx: ExecBlockInvokeContext): Unit = {
     val top   = ctx.parent.parent.parent.parent
     val block = top.doc.blocks.getOrElse(
       ctx.expr.name,
@@ -35,7 +35,7 @@ trait OnlyMainVisitationStyle extends VisitationStyle {
   this: ExecNodeVisitor =>
 
   /** Visit the main block */
-  def visitDoc(ctx: ExecDocContext) {
+  def visitDoc(ctx: ExecDocContext): Unit = {
     visitBlock(ExecBlockContext(ctx.doc.main, ctx))
   }
 
@@ -49,7 +49,7 @@ trait StructureAgnosticVisitationStyle extends VisitationStyle {
   this: ExecNodeVisitor =>
 
   /** Traverse all blocks in the top level */
-  def visitDoc(ctx: ExecDocContext) {
+  def visitDoc(ctx: ExecDocContext): Unit = {
     ctx.doc.blocks.values
       .map(ExecBlockContext(_, ctx))
       .foreach(visitBlock)

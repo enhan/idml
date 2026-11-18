@@ -45,17 +45,17 @@ trait ExecNodeVisitor {
   case class ExecArrayContext(expr: AstArray, parent: ExecPiplContext)    extends ExecExprContext
   case class ExecObjectContext(expr: AstObject, parent: ExecPiplContext)  extends ExecExprContext
 
-  def visit(doc: Document) {
+  def visit(doc: Document): Unit = {
     visitDoc(ExecDocContext(doc))
   }
 
-  def visitBlock(ctx: ExecBlockContext) {
+  def visitBlock(ctx: ExecBlockContext): Unit = {
     ctx.block.rules foreach { rule =>
       visitRule(createRuleContext(rule, ctx))
     }
   }
 
-  def visitRule(ctx: ExecRuleContext) {
+  def visitRule(ctx: ExecRuleContext): Unit = {
     ctx match {
       case ctx: ExecAssignContext   => visitAssign(ctx)
       case ctx: ExecReassignContext => visitReassign(ctx)
@@ -71,11 +71,11 @@ trait ExecNodeVisitor {
     }
   }
 
-  def visitAssign(ctx: ExecAssignContext) {
+  def visitAssign(ctx: ExecAssignContext): Unit = {
     visitPipl(ExecPiplContext(ctx.rule.exps, ctx))
   }
 
-  def visitReassign(ctx: ExecReassignContext) {
+  def visitReassign(ctx: ExecReassignContext): Unit = {
     visitPipl(ExecPiplContext(ctx.rule.exps, ctx))
   }
 
@@ -83,7 +83,7 @@ trait ExecNodeVisitor {
     visitPipl(ExecPiplContext(ctx.rule.exps, ctx))
   }
 
-  def visitPipl(ctx: ExecPiplContext) {
+  def visitPipl(ctx: ExecPiplContext): Unit = {
     ctx.pipl.exps foreach { expr =>
       visitExpr(createExprContext(expr, ctx))
     }
@@ -109,7 +109,7 @@ trait ExecNodeVisitor {
     }
   }
 
-  def visitExpr(ctx: ExecExprContext) {
+  def visitExpr(ctx: ExecExprContext): Unit = {
     ctx match {
       case ctx: ExecAnyContext         => visitAny(ctx)
       case ctx: ExecIndexContext       => visitIndex(ctx)
@@ -128,27 +128,27 @@ trait ExecNodeVisitor {
 
   def visitFilter(ctx: ExecFilterContext): Unit = {}
 
-  def visitAny(ctx: ExecAnyContext) {}
+  def visitAny(ctx: ExecAnyContext): Unit = {}
 
-  def visitIndex(ctx: ExecIndexContext) {}
+  def visitIndex(ctx: ExecIndexContext): Unit = {}
 
-  def visitNav(ctx: ExecNavContext) {}
+  def visitNav(ctx: ExecNavContext): Unit = {}
 
-  def visitPath(ctx: ExecPathContext) {}
+  def visitPath(ctx: ExecPathContext): Unit = {}
 
-  def visitSlice(ctx: ExecSliceContext) {}
+  def visitSlice(ctx: ExecSliceContext): Unit = {}
 
-  def visitFunc(ctx: ExecFuncContext) {}
+  def visitFunc(ctx: ExecFuncContext): Unit = {}
 
-  def visitCoalesce(ctx: ExecCoalesceContext) {}
+  def visitCoalesce(ctx: ExecCoalesceContext): Unit = {}
 
-  def visitWildcard(ctx: ExecWildcardContext) {}
+  def visitWildcard(ctx: ExecWildcardContext): Unit = {}
 
-  def visitMaths(ctx: ExecMathsContext) {}
+  def visitMaths(ctx: ExecMathsContext): Unit = {}
 
-  def visitIf(ctx: ExecIfContext) {}
+  def visitIf(ctx: ExecIfContext): Unit = {}
 
-  def visitMatch(ctx: ExecMatchContext) {}
+  def visitMatch(ctx: ExecMatchContext): Unit = {}
 
 }
 // scalastyle:on number.of.methods

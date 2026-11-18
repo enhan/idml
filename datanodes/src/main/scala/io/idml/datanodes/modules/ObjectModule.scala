@@ -10,7 +10,7 @@ trait ObjectModule {
   this: IdmlValue =>
 
   /** Remove a field by name */
-  def remove(path: String) {}
+  def remove(path: String): Unit = {}
 
   def values(): IdmlValue =
     this match {

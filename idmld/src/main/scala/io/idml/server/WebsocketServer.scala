@@ -22,12 +22,11 @@ import io.idml._
 import io.idml.circe.instances._
 import io.idml.circe._
 import fs2._
-import org.http4s.server.websocket.WebSocketBuilder
+import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame.Text
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 object WebsocketServer {
@@ -61,7 +60,7 @@ object WebsocketServer {
       .withResolver(new GeoFunctionResolver(IdmlCirce))
       .build()
 
-  def service(fr: FunctionResolverService)(implicit ec: ExecutionContext, c: Concurrent[IO]) = {
+  def service(fr: FunctionResolverService)(wsb: WebSocketBuilder2[IO]): HttpRoutes[IO] = {
     val idml = new IdmlBuilder(fr).build()
     HttpRoutes.of[IO] {
       case GET -> Root / "functions" / partial =>
@@ -77,12 +76,7 @@ object WebsocketServer {
           .flatMap(Ok(_))
 
       case req @ GET -> Root =>
-        val queue                                               = fs2.concurrent.Queue.unbounded[IO, WebSocketFrame]
-        val echoReply: Pipe[IO, WebSocketFrame, WebSocketFrame] = _.collect {
-          case Text(msg, _) => Text("You sent the server: " + msg)
-          case _            => Text("Something new")
-        }
-        val main: Pipe[IO, WebSocketFrame, Response]            = _.flatMap {
+        val main: Pipe[IO, WebSocketFrame, Response] = _.flatMap {
           _ match {
             case Text(msg, _) =>
               Stream.eval(
@@ -121,11 +115,7 @@ object WebsocketServer {
           }
         }
 
-        queue.flatMap { q =>
-          val d = q.dequeue.through(main.andThen(_.map(resp => Text(resp.asJson.toString()))))
-          val e = q.enqueue
-          WebSocketBuilder[IO].build(d, e)
-        }
+        wsb.build(main.andThen(_.map(resp => Text(resp.asJson.toString()))))
 
     }
   }

@@ -13,7 +13,7 @@ case class Assignment(dest: List[String], exps: Pipeline, positions: Option[Posi
     extends Rule {
 
   /** Make an assignment */
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.enterAssignment(this)
 
     exps.invoke(ctx)
@@ -35,7 +35,7 @@ case class Assignment(dest: List[String], exps: Pipeline, positions: Option[Posi
   /** Traverse a JsonNode tree with a list of path parts with the ultimate goal of assigning a value
     */
   @tailrec
-  final protected def assign(current: IdmlObject, path: List[String], value: IdmlValue) {
+  final protected def assign(current: IdmlObject, path: List[String], value: IdmlValue): Unit = {
     path match {
       case Nil          => throw new IllegalArgumentException("Can't use an empty path")
       case head :: Nil  => assignValue(current, head, value)
@@ -44,14 +44,14 @@ case class Assignment(dest: List[String], exps: Pipeline, positions: Option[Posi
   }
 
   /** Adds a new field to an object. Does some additional, configurable checks */
-  protected def assignValue(current: IdmlObject, key: String, value: IdmlValue) {
+  protected def assignValue(current: IdmlObject, key: String, value: IdmlValue): Unit = {
     current.fields(key) = value
   }
 
   /** Traverse a JsonNode tree with a list of path parts with the ultimate goal of deleting a value
     */
   @tailrec
-  final protected def delete(current: IdmlObject, path: List[String]) {
+  final protected def delete(current: IdmlObject, path: List[String]): Unit = {
     path match {
       case Nil          => throw new IllegalArgumentException("Can't use an empty path")
       case head :: Nil  => deleteValue(current, head)
@@ -59,7 +59,7 @@ case class Assignment(dest: List[String], exps: Pipeline, positions: Option[Posi
     }
   }
 
-  protected def deleteValue(current: IdmlObject, key: String) {
+  protected def deleteValue(current: IdmlObject, key: String): Unit = {
     current.fields.remove(key)
   }
 }

@@ -8,7 +8,7 @@ trait DomModule {
 
   def tagName: IdmlValue =
     this match {
-      case e: IDomElement => Option(e.name).map(IString).getOrElse(MissingField)
+      case e: IDomElement => Option(e.name).map(IString.apply).getOrElse(MissingField)
       case _              => CastUnsupported
     }
 

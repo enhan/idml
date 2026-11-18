@@ -82,13 +82,13 @@ object StringModule {
   def normalize(input: String, form: String): IdmlValue =
     Try { Normalizer.Form.valueOf(form) }
       .flatMap { form =>
-        Try { Normalizer.normalize(input, form) }.map(IString)
+        Try { Normalizer.normalize(input, form) }.map(IString.apply)
       }
       .getOrElse(CastFailed)
 
   def stringTransformer(i: IdmlValue)(f: String => Option[String]): IdmlValue =
     i match {
-      case s: IdmlString => f(s.value).map(IString).getOrElse(CastFailed)
+      case s: IdmlString => f(s.value).map(IString.apply).getOrElse(CastFailed)
       case _             => CastUnsupported
     }
 

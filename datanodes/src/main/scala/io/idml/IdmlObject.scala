@@ -27,7 +27,7 @@ abstract class IdmlObject extends IdmlValue {
   }
 
   /** Remove fields if able */
-  override def remove(name: String) {
+  override def remove(name: String): Unit = {
     fields.remove(name)
   }
 

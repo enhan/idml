@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import io.idml.jackson.serder.PValueSerializer
 
 class DiffSerializer extends PValueSerializer {
-  override def serialize(value: IdmlValue, json: JsonGenerator, provider: SerializerProvider) {
+  override def serialize(
+      value: IdmlValue,
+      json: JsonGenerator,
+      provider: SerializerProvider): Unit = {
     value match {
       case arr: IdmlArray if Diff.isDiff(arr) =>
         val l = arr.get(1)

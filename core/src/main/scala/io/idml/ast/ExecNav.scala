@@ -8,28 +8,28 @@ trait ExecNav extends Expression
 
 /** The base of the expression is a literal value */
 case class ExecNavLiteral(literal: Literal) extends ExecNav {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     literal.invoke(ctx)
   }
 }
 
 /** The base of the expression is a variable */
 case object ExecNavVariable extends ExecNav {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.cursor = ctx.output
   }
 }
 
 /** The base of the expression is a relative path */
 case object ExecNavRelative extends ExecNav {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.cursor = ctx.scope
   }
 }
 
 /** The base of the expression is an absolute path */
 case object ExecNavAbsolute extends ExecNav {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     ctx.cursor = ctx.input
   }
 }

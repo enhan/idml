@@ -12,7 +12,7 @@ import scala.util.Try
 
 class IdmlJsonProperties extends Properties("IdmlJson") with ArbitraryInstances {
 
-  property("IdmlCirce should be able to parse anything IdmlJackson can") = forAll { j: Json =>
+  property("IdmlCirce should be able to parse anything IdmlJackson can") = forAll { (j: Json) =>
     val str           = j.noSpaces
     val jacksonResult = IdmlJackson.default.parseEither(str)
     val circeResult   = IdmlCirce.parseEither(str)

@@ -20,7 +20,7 @@ class IdmlJacksonModule extends Module {
 
   def version(): Version = Version.unknownVersion()
 
-  def setupModule(ctxt: SetupContext) {
+  def setupModule(ctxt: SetupContext): Unit = {
     ctxt.addSerializers(PValueSerializerResolver)
     ctxt.addDeserializers(PValueDeserializerResolver)
   }

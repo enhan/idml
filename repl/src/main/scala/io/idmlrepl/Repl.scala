@@ -1,21 +1,17 @@
 package io.idmlrepl
 
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.{Files, Paths}
 import cats._
 import cats.data.EitherT
-import cats.effect.{Blocker, ContextShift, ExitCode, Sync}
+import cats.effect.{ExitCode, Sync}
 import cats.implicits._
 import cats.mtl._
-import cats.mtl.implicits._
 import io.circe.Json
 import io.idml.circe.IdmlCirce
 import io.idml.{IdmlMapping, IdmlObject, Mapping}
 import org.jline.reader.EOFError
-import cats.tagless._
 import fansi.Color.LightGray
-import fs2.io.file.readAll
-
-import scala.concurrent.ExecutionContext
 
 // These represent the two modes the REPL can be in
 sealed trait ReplMode
@@ -37,16 +33,25 @@ trait JLine[F[_]] {
   def compileJson: String => Either[Throwable, IdmlObject]
   def compileIdml: String => Either[Throwable, Mapping]
   def close: F[Unit]
-}
-object JLine      {
-  implicit def functorKForJLine: FunctorK[JLine] = Derive.functorK[JLine]
+
+  def mapK[G[_]](fk: F ~> G): JLine[G] = {
+    val self = this
+    new JLine[G] {
+      def printAbove(s: String): G[Unit]                       = fk(self.printAbove(s))
+      def readJson: G[ReadLine[IdmlObject]]                    = fk(self.readJson)
+      def readIdml: G[ReadLine[Mapping]]                       = fk(self.readIdml)
+      def compileJson: String => Either[Throwable, IdmlObject] = self.compileJson
+      def compileIdml: String => Either[Throwable, Mapping]    = self.compileIdml
+      def close: G[Unit]                                       = fk(self.close)
+    }
+  }
 }
 
 // The pure implementation of the REPL logic
-class Repl[F[_]: Sync: ContextShift](jline: JLine[F], blocker: Blocker)(implicit
-    mode: MonadState[F, ReplMode],
-    data: MonadState[F, IdmlObject],
-    exit: FunctorRaise[F, ExitCode]
+class Repl[F[_]: Sync](jline: JLine[F])(implicit
+    mode: Stateful[F, ReplMode],
+    data: Stateful[F, IdmlObject],
+    exit: Raise[F, ExitCode]
 ) {
   object Load {
     def unapply(s: String): Option[String] =
@@ -55,17 +60,15 @@ class Repl[F[_]: Sync: ContextShift](jline: JLine[F], blocker: Blocker)(implicit
       else None
   }
 
+  // F is a StateT stack, which has no Async (so no fs2 Files): read with plain NIO instead
   def loadFile(s: String): F[String] =
-    for {
-      p    <- Sync[F].delay { Paths.get(s) }
-      body <- readAll[F](p, blocker, 1024).through(fs2.text.utf8Decode[F]).compile.foldMonoid
-    } yield body
+    Sync[F].blocking { new String(Files.readAllBytes(Paths.get(s)), UTF_8) }
 
   def command(s: String): F[Unit] =
     s match {
       case ".json"           => mode.set(JSONMode)
       case ".idml"           => mode.set(IDMLMode)
-      case ".exit" | ".quit" => exit.raise[Unit](ExitCode.Success)
+      case ".exit" | ".quit" => exit.raise[ExitCode, Unit](ExitCode.Success)
       case ".help"           =>
         jline.printAbove(
           s"""This REPL consists of two modes: json and idml. The current mode is identified by the prompt.
@@ -119,7 +122,7 @@ class Repl[F[_]: Sync: ContextShift](jline: JLine[F], blocker: Blocker)(implicit
       case Result(t)  => f(t)
       case Error(e)   => jline.printAbove(e.toString)
       case Command(c) => command(c)
-      case EOF()      => exit.raise[Unit](ExitCode.Success)
+      case EOF()      => exit.raise[ExitCode, Unit](ExitCode.Success)
     }
 
   // the most important method of the REPL, this is run repeatedly, since it uses and modifies state and can raise an ExitCode

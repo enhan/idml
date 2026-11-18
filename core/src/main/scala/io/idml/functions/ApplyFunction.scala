@@ -11,7 +11,7 @@ case class ApplyFunction(n: String) extends IdmlFunction {
   def args: immutable.Nil.type = Nil
 
   /** Execute the underlying block, if it exists */
-  override def invoke(ctx: IdmlContext) {
+  override def invoke(ctx: IdmlContext): Unit = {
     // Preserve the existing scope and output object
     val oldScope  = ctx.scope
     val oldOutput = ctx.output

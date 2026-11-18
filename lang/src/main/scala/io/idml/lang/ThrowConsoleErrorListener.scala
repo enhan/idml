@@ -16,7 +16,7 @@ class ThrowConsoleErrorListener extends ConsoleErrorListener {
       charPositionInLine: Int,
       msg: String,
       ex: RecognitionException
-  ) {
+  ): Unit = {
     throw new DocumentParseException("Line " + line + ":" + charPositionInLine + " " + msg, ex)
   }
 }

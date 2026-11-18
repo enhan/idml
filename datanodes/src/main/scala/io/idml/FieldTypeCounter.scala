@@ -42,12 +42,12 @@ case class FieldTypeCounter(
     super.visitNull(path)
   }
 
-  override def visitObject(path: Seq[String], obj: IdmlObject) {
+  override def visitObject(path: Seq[String], obj: IdmlObject): Unit = {
     objects += 1
     super.visitObject(path, obj)
   }
 
-  override def visitArray(path: Seq[String], array: IdmlArray) {
+  override def visitArray(path: Seq[String], array: IdmlArray): Unit = {
     arrays += 1
     super.visitArray(path, array)
   }

@@ -17,7 +17,7 @@ object TimezoneFunction {
   case object TimezoneFunction extends IdmlFunction0 {
     override protected def apply(cursor: IdmlValue): IdmlValue = {
       cursor match {
-        case g: Geo => query(g).map(IString).getOrElse(MissingField)
+        case g: Geo => query(g).map(IString.apply).getOrElse(MissingField)
         case _      => InvalidParameters
       }
     }

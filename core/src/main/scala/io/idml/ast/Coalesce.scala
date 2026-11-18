@@ -4,7 +4,7 @@ import io.idml.{EmptyCoalesce, IdmlContext, IdmlNothing}
 
 /** Try to execute a series of pipls and pick the first with a value */
 case class Coalesce(exps: List[Pipeline]) extends Expression {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     val tmp = ctx.scope
     ctx.scope = ctx.cursor
     ctx.cursor = exps.view

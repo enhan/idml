@@ -14,9 +14,9 @@ import org.jline.reader.impl.history.DefaultHistory
 import org.jline.reader._
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import cats.effect._
-import cats.effect.concurrent.Ref
+import cats.effect.std.Dispatcher
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.util.Try
 import scala.util.control.NoStackTrace
@@ -24,7 +24,11 @@ import scala.util.control.NoStackTrace
 // Used to flag up commands
 case class CommandException(c: String) extends Throwable with NoStackTrace
 
-class JLineImpl[F[_]: Effect](data: Ref[F, IdmlObject], term: Option[Terminal]) extends JLine[F] {
+class JLineImpl[F[_]: Sync](
+    data: Ref[F, IdmlObject],
+    term: Option[Terminal],
+    dispatcher: Dispatcher[F])
+    extends JLine[F] {
 
   def passthroughParsedLine(s: String, c: Int): ParsedLine =
     new ParsedLine {
@@ -93,7 +97,7 @@ class JLineImpl[F[_]: Effect](data: Ref[F, IdmlObject], term: Option[Terminal]) 
       } else {
         (line.line().replace(line.word(), ""), line.cursor() + 1 - line.wordCursor())
       }
-      val d                            = Effect[F].toIO(data.get).unsafeRunSync()
+      val d                            = dispatcher.unsafeRunSync(data.get)
       val suggestions                  =
         Try { AutoComplete.complete(idml)(d, partialLine, partialCursor) }.getOrElse(Set.empty)
       suggestions.foreach { suggestion =>
@@ -169,10 +173,10 @@ class JLineImpl[F[_]: Effect](data: Ref[F, IdmlObject], term: Option[Terminal]) 
       }
 
   override def readJson: F[ReadLine[IdmlObject]] =
-    read(Sync[F].delay { jsonLr.readLine("json> ") }.attempt)(compileJson)
+    read(Sync[F].blocking { jsonLr.readLine("json> ") }.attempt)(compileJson)
 
   override def readIdml: F[ReadLine[Mapping]] =
-    read(Sync[F].delay { lr.readLine(LightRed("~> ").render) }.attempt)(compileIdml)
+    read(Sync[F].blocking { lr.readLine(LightRed("~> ").render) }.attempt)(compileIdml)
 
   override val compileJson: String => Either[Throwable, IdmlObject] =
     IdmlCirce.parseObjectEither(_).leftWiden[Throwable]

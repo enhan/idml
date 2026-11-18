@@ -20,7 +20,7 @@ case class Pipeline(exps: List[Expression]) extends Argument {
     }
   // scalastyle:on method.name
 
-  def validate() {
+  def validate(): Unit = {
     require(exps.count(_.isInstanceOf[ExecNav]) == 1)
     require(exps.headOption.filter(_.isInstanceOf[ExecNav]).isDefined)
   }
@@ -47,7 +47,7 @@ case class Pipeline(exps: List[Expression]) extends Argument {
     }
 
   /** Run a pipl */
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     invoke(ctx, exps)
   }
 }

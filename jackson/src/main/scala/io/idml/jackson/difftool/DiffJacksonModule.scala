@@ -12,7 +12,7 @@ class DiffJacksonModule extends Module {
 
   def version(): Version = Version.unknownVersion()
 
-  def setupModule(ctxt: SetupContext) {
+  def setupModule(ctxt: SetupContext): Unit = {
     ctxt.addSerializers(DiffJacksonSerializerResolver)
   }
 }

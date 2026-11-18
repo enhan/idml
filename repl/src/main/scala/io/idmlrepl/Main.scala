@@ -2,11 +2,9 @@ package io.idmlrepl
 
 import cats._
 import cats.data._
-import cats.effect.concurrent.Ref
 import cats.implicits._
-import cats.effect.{Blocker, ExitCode, IO, IOApp}
-import cats.mtl.implicits._
-import cats.tagless.implicits._
+import cats.effect.{ExitCode, IO, IOApp, Ref}
+import cats.effect.std.Dispatcher
 import io.idml.IdmlObject
 import io.idml.datanodes.IObject
 import io.idml.BuildInfo
@@ -33,14 +31,14 @@ object Main extends IOApp {
   def execute(term: Option[Terminal] = None): decline.Command[IO[ExitCode]] =
     decline.Command("repl", "run idml repl") {
       Opts(
-        Blocker[IO].use { blocker =>
+        Dispatcher.sequential[IO].use { dispatcher =>
           for {
             data     <- Ref.of[IO, IdmlObject](IObject())
             jline    <- IO {
-                          new JLineImpl[IO](data, term)
+                          new JLineImpl[IO](data, term, dispatcher)
                         }.widen[JLine[IO]]
             jliner    = jline.mapK(lift)
-            repl      = new Repl(jliner, blocker)
+            repl      = new Repl(jliner)
             _        <- jline.printAbove(s"""idml ${BuildInfo.version} (${BuildInfo.builtAtString})
                  |
                  |Type ".help" for instructions on how to use this tool. Press ctrl+c, ctl+d or type .exit to exit.""".stripMargin)

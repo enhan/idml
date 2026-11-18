@@ -35,7 +35,7 @@ trait RegexModule {
               PRegexFactory
                 .getRegex(s.value)
                 .`match`(t.value)
-                .map { IString }
+                .map { IString.apply }
                 .toBuffer[IdmlValue]
             )
           case _          => InvalidParameters
@@ -54,7 +54,7 @@ trait RegexModule {
               PRegexFactory
                 .getRegex(s.value)
                 .split(t.value)
-                .map { IString }
+                .map { IString.apply }
                 .toBuffer[IdmlValue]
             )
           case _          => InvalidParameters

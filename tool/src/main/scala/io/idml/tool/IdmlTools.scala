@@ -22,18 +22,16 @@ import io.idml.server.Server
 import io.idml.circe.IdmlCirce
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
-import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.implicits._
-import io.idml.server.WebsocketServer
+import scala.jdk.CollectionConverters._
+import com.comcast.ip4s._
+import fs2.io.file.{Files, Path}
 import io.idml.utils.Tracer.Annotator
 
 import scala.util.{Failure, Success, Try}
 import scala.io.Source
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object IdmlTools {
-  implicit val urlArgument                            = new Argument[URL] {
+  implicit val urlArgument: Argument[URL]             = new Argument[URL] {
     override def read(string: String): ValidatedNel[String, URL] =
       Try {
         new URL(string)
@@ -61,23 +59,18 @@ object IdmlTools {
     }
   }
 
-  def server(implicit c: ConcurrentEffect[IO], t: Timer[IO]) =
+  def server =
     Command(
       name = "server",
       header = "IDML language server"
     ) {
       val bindAll = Opts.flag("bind-all", "Bind to all interfaces", short = "b").orFalse
       (bindAll, functionResolver).mapN { case (b, fr) =>
-        BlazeServerBuilder[IO](global)
-          .withHttpApp(WebsocketServer.service(fr).orNotFound)
-          .bindHttp(8081, if (b) "0.0.0.0" else "localhost")
-          .serve
-          .compile
-          .lastOrError
+        Server.serve(if (b) ipv4"0.0.0.0" else host"localhost", fr)
       }
     }
 
-  def apply(implicit cs: ContextShift[IO]) =
+  def apply =
     Command(
       name = "apply",
       header = "IDML command line tool"
@@ -111,114 +104,110 @@ object IdmlTools {
             if (config.traceFile.isDefined) Some(new Annotator(jsonModule)) else None
           val modules        = List(unmappedModule, analysisModule).flatten
 
-          Blocker[IO].use { blocker =>
-            {
-              for {
-                _        <- EitherT
-                              .cond[IO](
-                                !(config.traceFile.isDefined && config.files.length != 1),
-                                (),
-                                "When tracing please supply one mapping to run"
-                              )
-                engine   <- EitherT.liftF(IO {
-                              new IdmlBuilder(fr)
-                                .withListeners(modules: _*)
-                                .build()
-                            })
-                found    <-
-                  EitherT(IO {
-                    val (exists, doesntExist) = config.files.partition(_.exists())
-                    if (doesntExist.nonEmpty) {
-                      doesntExist.map(f => s"Couldn't load mapping from $f").mkString("\n").asLeft
-                    } else {
-                      exists.asRight
-                    }
-                  })
-                strings  <- EitherT.liftF(found.traverse { f =>
-                              fs2.io.file
-                                .readAll[IO](f.toPath, blocker, 2048)
-                                .through(fs2.text.utf8Decode[IO])
-                                .compile
-                                .foldMonoid
-                            })
-                compiled <- found.zip(strings).traverse { case (file, s) =>
-                              EitherT(IO {
-                                Either
-                                  .catchOnly[DocumentParseException](engine.compile(s))
-                                  .leftMap { c =>
-                                    s"Couldn't compile ${file.getName}: ${c.getMessage}"
-                                  }
-                              })
-                            }
-                _        <- if (config.strict)
-                              found
-                                .zip(compiled)
-                                .traverse { case (file, m) =>
-                                  EitherT(IO {
-                                    Either
-                                      .catchOnly[ClassificationException] {
-                                        DocumentValidator.validate(m.asInstanceOf[IdmlMapping].nodes)
-                                      }
-                                      .leftMap { ce =>
-                                        s"Couldn't validate ${file.getName}: ${ce.getMessage}"
-                                      }
-                                  })
-                                }
-                                .void
-                            else EitherT.rightT[IO, String](())
-                // and we get to the main loop!
-                chain     = engine.chain(compiled: _*)
-                _        <- fs2.io
-                              .stdin[IO](2048, blocker)
-                              .through(fs2.text.utf8Decode[IO])
-                              .through(fs2.text.lines)
-                              .filter(_.nonEmpty)
-                              .evalMap { line =>
-                                IO.fromEither(
-                                  jsonModule.parseObjectEither(line).leftWiden[Throwable]
-                                )
-                              }
-                              .evalTap { j =>
-                                IO {
-                                  val result = engine.run(chain, j)
-                                  if (config.pretty) {
-                                    println(jsonModule.pretty(result))
-                                  } else {
-                                    println(jsonModule.compact(result))
-                                  }
-                                  result
-                                }.flatMap { result =>
-                                  (config.traceFile, analysisModule) match {
-                                    case (Some(outputFile), Some(annotator)) =>
-                                      fs2.Stream
-                                        .emit(annotator.render(strings.head))
-                                        .covary[IO]
-                                        .through(fs2.text.utf8Encode[IO])
-                                        .through(
-                                          fs2.io.file.writeAll(outputFile.toPath, blocker)
-                                        )
-                                        .compile
-                                        .drain
-                                    case _                                   =>
-                                      IO.unit
-                                  }
-                                }
-                              }
+          {
+            for {
+              _        <- EitherT
+                            .cond[IO](
+                              !(config.traceFile.isDefined && config.files.length != 1),
+                              (),
+                              "When tracing please supply one mapping to run"
+                            )
+              engine   <- EitherT.liftF(IO {
+                            new IdmlBuilder(fr)
+                              .withListeners(modules: _*)
+                              .build()
+                          })
+              found    <-
+                EitherT(IO {
+                  val (exists, doesntExist) = config.files.partition(_.exists())
+                  if (doesntExist.nonEmpty) {
+                    doesntExist.map(f => s"Couldn't load mapping from $f").mkString("\n").asLeft
+                  } else {
+                    exists.asRight
+                  }
+                })
+              strings  <- EitherT.liftF(found.traverse { f =>
+                            Files[IO]
+                              .readAll(Path.fromNioPath(f.toPath))
+                              .through(fs2.text.utf8.decode)
                               .compile
-                              .drain
-                              .attemptT
-                              .leftMap { e =>
-                                s"Couldn't process input: ${e.getMessage}"
+                              .foldMonoid
+                          })
+              compiled <- found.zip(strings).traverse { case (file, s) =>
+                            EitherT(IO {
+                              Either
+                                .catchOnly[DocumentParseException](engine.compile(s))
+                                .leftMap { c =>
+                                  s"Couldn't compile ${file.getName}: ${c.getMessage}"
+                                }
+                            })
+                          }
+              _        <- if (config.strict)
+                            found
+                              .zip(compiled)
+                              .traverse { case (file, m) =>
+                                EitherT(IO {
+                                  Either
+                                    .catchOnly[ClassificationException] {
+                                      DocumentValidator.validate(m.asInstanceOf[IdmlMapping].nodes)
+                                    }
+                                    .leftMap { ce =>
+                                      s"Couldn't validate ${file.getName}: ${ce.getMessage}"
+                                    }
+                                })
                               }
-              } yield ()
-            }.leftSemiflatMap { error =>
-              IO {
-                System.err.println(error)
-                ExitCode.Error
-              }
-            }.as(ExitCode.Success)
-              .merge
-          }
+                              .void
+                          else EitherT.rightT[IO, String](())
+              // and we get to the main loop!
+              chain     = engine.chain(compiled: _*)
+              _        <- fs2.io
+                            .stdin[IO](2048)
+                            .through(fs2.text.utf8.decode)
+                            .through(fs2.text.lines)
+                            .filter(_.nonEmpty)
+                            .evalMap { line =>
+                              IO.fromEither(
+                                jsonModule.parseObjectEither(line).leftWiden[Throwable]
+                              )
+                            }
+                            .evalTap { j =>
+                              IO {
+                                val result = engine.run(chain, j)
+                                if (config.pretty) {
+                                  println(jsonModule.pretty(result))
+                                } else {
+                                  println(jsonModule.compact(result))
+                                }
+                                result
+                              }.flatMap { result =>
+                                (config.traceFile, analysisModule) match {
+                                  case (Some(outputFile), Some(annotator)) =>
+                                    fs2.Stream
+                                      .emit(annotator.render(strings.head))
+                                      .covary[IO]
+                                      .through(fs2.text.utf8.encode)
+                                      .through(Files[IO].writeAll(Path.fromNioPath(outputFile.toPath)))
+                                      .compile
+                                      .drain
+                                  case _                                   =>
+                                    IO.unit
+                                }
+                              }
+                            }
+                            .compile
+                            .drain
+                            .attemptT
+                            .leftMap { e =>
+                              s"Couldn't process input: ${e.getMessage}"
+                            }
+            } yield ()
+          }.leftSemiflatMap { error =>
+            IO {
+              System.err.println(error)
+              ExitCode.Error
+            }
+          }.as(ExitCode.Success)
+            .merge
         }
     }
 }

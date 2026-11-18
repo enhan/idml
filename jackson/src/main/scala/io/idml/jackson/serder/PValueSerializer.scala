@@ -17,7 +17,7 @@ import io.idml.datanodes.IDomElement
 
 /** The Jackson serializer for PValues */
 class PValueSerializer extends JsonSerializer[IdmlValue] {
-  def serialize(value: IdmlValue, json: JsonGenerator, provider: SerializerProvider) {
+  def serialize(value: IdmlValue, json: JsonGenerator, provider: SerializerProvider): Unit = {
     value match {
       case n: IdmlInt    => json.writeNumber(n.value)
       case n: IdmlDouble => json.writeNumber(n.value)

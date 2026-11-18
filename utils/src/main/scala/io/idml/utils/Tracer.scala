@@ -28,7 +28,7 @@ object Tracer {
     def clear() = results.clear()
 
     def render(s: String): String = {
-      val output = s.lines.toArray
+      val output = s.linesIterator.toArray
       results.foreach { case (Position(line, char), r) =>
         output(line - 1) = output(line - 1) + " # " + json.compact(r)
       }

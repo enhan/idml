@@ -57,7 +57,7 @@ object instances {
 
   implicit val objectDecoder: Decoder[IdmlObject] =
     Decoder[Json]
-      .emap { j: Json =>
+      .emap { (j: Json) =>
         Either.fromOption(j.asObject, "Only an Object can be decoded into a IdmlObject")
       }
       .emapTry(o => Try(decodeObject(o)))

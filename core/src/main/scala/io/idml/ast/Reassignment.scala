@@ -10,7 +10,7 @@ case class Reassignment(dest: List[String], exps: Pipeline) extends Rule {
   require(dest.nonEmpty, "Cannot make a reassignment to an empty path")
 
   /** Make an assignment */
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     val (parent, lastKey, lastValue) = ctx.output match {
       case obj: IObject => findDestination(obj, dest)
       case _            =>

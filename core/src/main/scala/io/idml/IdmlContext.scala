@@ -21,23 +21,23 @@ case class IdmlContext(
     val state: mutable.Map[Any, Any]
 ) {
 
-  def this(input: IdmlValue, output: IdmlObject, listeners: List[IdmlListener]) {
+  def this(input: IdmlValue, output: IdmlObject, listeners: List[IdmlListener]) = {
     this(Document.empty, input, output, listeners, mutable.Map())
   }
 
-  def this(mapping: Document, input: IdmlValue, output: IdmlObject) {
+  def this(mapping: Document, input: IdmlValue, output: IdmlObject) = {
     this(mapping, input, output, Nil, mutable.Map())
   }
 
-  def this(input: IdmlValue, output: IdmlObject) {
+  def this(input: IdmlValue, output: IdmlObject) = {
     this(input, output, Nil)
   }
 
-  def this(input: IdmlValue) {
+  def this(input: IdmlValue) = {
     this(input, IObject(), Nil)
   }
 
-  def this() {
+  def this() = {
     this(IdmlNull, IObject(), Nil)
   }
 

@@ -8,7 +8,7 @@ import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.AttributedString
 import org.jline.reader.impl.history.DefaultHistory
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class JLine[F[_]](name: String, t: Terminal)(implicit F: Sync[F]) {
   val history     = new DefaultHistory()
@@ -53,8 +53,8 @@ class JLine[F[_]](name: String, t: Terminal)(implicit F: Sync[F]) {
   def flush(): F[Unit] = F.delay { t.flush() }
 
   def width(): F[Int]                          = F.delay { t.getWidth }
-  def readLine(prompt: String): F[String]      = F.delay { reader.readLine(prompt) }
-  def readMultiline(prompt: String): F[String] = F.delay { multiReader.readLine(prompt) }
+  def readLine(prompt: String): F[String]      = F.blocking { reader.readLine(prompt) }
+  def readMultiline(prompt: String): F[String] = F.blocking { multiReader.readLine(prompt) }
   def printAbove(string: String): F[Unit]      = F.delay { reader.printAbove(string) }
 }
 object JLine                                                      {

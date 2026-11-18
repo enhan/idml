@@ -16,5 +16,5 @@ case class IInt(value: Long) extends IdmlInt {
 
   override def toLongOption: Some[Long] = Some(value)
 
-  override def toDoubleOption = Some(value.toDouble)
+  override def toDoubleOption: Some[Double] = Some(value.toDouble)
 }

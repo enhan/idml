@@ -28,7 +28,7 @@ case class IDomElement(name: String, attrs: Map[String, String], children: List[
   def fields: mutable.Map[String, IdmlValue] =
     mutable.Map(
       "name"       -> IString(name),
-      "attributes" -> IObject(attrs.mapValues(IString).toList: _*),
+      "attributes" -> IObject(attrs.mapValues(IString.apply).toList: _*),
       "contents"   -> IArray(children.toBuffer[IdmlValue])
     )
   def items: mutable.Buffer[IdmlValue]       = children.toBuffer[IdmlValue]

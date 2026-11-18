@@ -27,5 +27,5 @@ abstract class IdmlFunction0 extends IdmlFunction {
     ctx.exitFunc(this)
   }
 
-  val args = Nil
+  val args: collection.immutable.Nil.type = Nil
 }

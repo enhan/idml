@@ -5,7 +5,7 @@ import io.idml.{Filtered, IdmlArray, IdmlContext, IdmlNothing, IdmlString, IdmlV
 
 /** Top level class for implementing predicates */
 trait Predicate extends Argument {
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     val tmp = ctx.cursor
     if (!predicate(ctx, tmp)) {
       ctx.cursor = Filtered
@@ -38,7 +38,7 @@ case class Filter(pred: Predicate) extends Expression {
     pred.invoke(ctx)
   }
 
-  def invoke(ctx: IdmlContext) {
+  def invoke(ctx: IdmlContext): Unit = {
     val tmp = ctx.scope
     ctx.cursor match {
       case arr: IdmlArray => invokeOnArray(ctx)

@@ -64,7 +64,7 @@ object IdmlValue {
 
   implicit val nullOrdering: Ordering[IdmlNothing] = (a: IdmlNothing, b: IdmlNothing) => 0
 
-  implicit val ptolemyValueOrdering = new Ordering[IdmlValue] {
+  implicit val ptolemyValueOrdering: Ordering[IdmlValue] = new Ordering[IdmlValue] {
     override def compare(x: IdmlValue, y: IdmlValue): Int = {
       (sortingClass(x) - sortingClass(y)) match {
         case i if i < 0  => -1

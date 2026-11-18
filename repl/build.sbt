@@ -1,11 +1,9 @@
 name := "idml-repl"
 
 libraryDependencies ++= Seq(
-  "co.fs2"        %% "fs2-io"              % "2.5.5",
-  "org.typelevel" %% "cats-mtl-core"       % "0.7.1",
-  "org.typelevel" %% "cats-tagless-macros" % "0.14.0",
-  "org.typelevel" %% "cats-effect"         % "2.5.0",
-  "com.monovore"  %% "decline"             % "1.4.0",
+  "org.typelevel" %% "cats-mtl"            % "1.7.0",
+  "org.typelevel" %% "cats-effect"         % "3.7.1",
+  "com.monovore"  %% "decline"             % "2.6.2",
   "com.lihaoyi"   %% "fansi"               % "0.2.13",
   "org.jline"      % "jline-terminal-jna"  % "3.13.3",
   "org.jline"      % "jline-reader"        % "3.13.3",

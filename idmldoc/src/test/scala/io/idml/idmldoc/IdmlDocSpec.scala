@@ -1,6 +1,7 @@
 package io.idml.idmldoc
 
 import cats.effect._
+import cats.effect.unsafe.implicits.global
 import cats._
 import cats.implicits._
 import io.idml.doc.{Markdown, Runners}
