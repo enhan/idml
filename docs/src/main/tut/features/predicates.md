@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Predicates
-section: language
----
+# Predicates
 
 Predicates are one of the two basic building blocks of IDML, they're boolean expressions which are used for ifs, matches and filters.
 

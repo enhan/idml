@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: URL
-section: language
----
+# URL
 
 The url function allows the parsing and transformation of URLs
 

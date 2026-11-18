@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Basic Usage
-section: api
----
+# Basic Usage
 
 If you want to embed the library in your service, here's a short guide on how to use its internal API.
 
@@ -98,7 +94,7 @@ This use case evolved from the interation data model at DataSift where we have r
         e.printStackTrace();
     }
 
-![chain diagram](./diagrams/chain.png)
+![chain diagram](diagrams/chain.png)
 
 ## Mapping Merges
 
@@ -124,4 +120,4 @@ This allows you to write parallel mappings rather than mappings which are applie
         e.printStackTrace();
     }
 
-![chain diagram](./diagrams/merge.png)
+![chain diagram](diagrams/merge.png)

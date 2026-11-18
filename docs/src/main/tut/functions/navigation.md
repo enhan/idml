@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Navigation
-section: language
----
+# Navigation
 
 Functions for traversal and manipulation of arrays and objects.
 
@@ -107,7 +103,7 @@ b = a[0:2]
 {"b": []}
 ```
 
-### compatibility check with JavaScript's slice(): a[1:2] == [a[1]]
+### compatibility check with JavaScript's slice(): `a[1:2] == [a[1]]`
 
 ```
 b = a[1:2]

@@ -1,12 +1,8 @@
----
-layout: home
-technologies:
- - first: ["JVM", "IDML is a JVM-first data transform language"]
- - second: ["Pure", "Transformations are always pure, and will return the same output every time"]
- - third: ["Safe", "All actions can fail safely to ensure as much of your data was mapped as possible"]
----
-
 # Overview
+
+* __JVM__ - IDML is a JVM-first data transform language
+* __Pure__ - Transformations are always pure, and will return the same output every time
+* __Safe__ - All actions can fail safely to ensure as much of your data was mapped as possible
 
 IDML is a data preparation language designed to process unstructured data at high volumes.
 

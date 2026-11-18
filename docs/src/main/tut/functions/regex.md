@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Regex
-section: language
----
+# Regex
 
 These functions allow you to manipulate strings using Java regular expressions. The underlying implementation is re2 (see [syntax](https://github.com/google/re2/wiki/Syntax)).
 

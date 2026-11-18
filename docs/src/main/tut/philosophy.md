@@ -1,9 +1,3 @@
----
-layout: docs
-title: Philosophy
-section: language
----
-
 # Philosophy
 
 ## Purity

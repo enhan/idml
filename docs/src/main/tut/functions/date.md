@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Date
-section: language
----
+# Date
 
 The Date functions allow you to manipulate the reading and writing of dates.
 

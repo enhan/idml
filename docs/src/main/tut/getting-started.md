@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Getting Started
-section: language
----
+# Getting Started
 
 ## Reading these docs
 

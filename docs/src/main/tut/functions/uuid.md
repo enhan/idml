@@ -1,12 +1,8 @@
----
-layout: docsplus
-title: UUID
-section: language
----
+# UUID
 
 The uuid functions allow the generation of UUIDs.
 
-Design Note: Type 1, 2 and 4 are not included because they are not deterministic, [see Philosophy](/philosophy.html#determinism).
+Design Note: Type 1, 2 and 4 are not included because they are not deterministic, [see Philosophy](../philosophy.md#determinism).
 
 ## uuid3
 

@@ -1,57 +1,57 @@
-import _root_.io.idml.doc.IdmlDocSbt
-import _root_.io.idml.doc.IdmlDocSbt.{idmlTargetDirectory, Idml, makeIdml}
-import microsites.ConfigYml
+import laika.ast.Path.Root
+import laika.config.{LaikaKeys, SyntaxHighlighting}
+import laika.format.Markdown
+import laika.helium.Helium
+import laika.helium.config.{HeliumIcon, IconLink, TextLink}
+import laika.theme.config.Color
+
+import scala.sys.process.Process
 
 enablePlugins(IdmlDocSbt)
-enablePlugins(MicrositesPlugin)
 
-micrositeName := "IDML"
+name := "idml-docs"
 
-micrositeDescription := "Ingestion Data Mapping Language"
+scalaVersion := "3.3.9" // nothing is compiled here; set to silence the default-version warning
 
-//micrositeBaseUrl := "/idml"
+// idmldoc emits fenced code blocks, a GitHub-flavored extension, as are the tables of dependencies.md
+laikaExtensions := Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
 
-//micrositeDocumentationUrl := "/idml/docs"
+// index.md, not Laika's default README.md, is each directory's title document
+laikaConfig := LaikaConfig.defaults.withRawContent // functions/date.md has an HTML table
+  .withConfigValue(LaikaKeys.titleDocuments.inputName, "index")
 
-micrositeAuthor := "fairhair.ai"
+laikaTheme := Helium.defaults.site
+  .metadata(title = Some("IDML"), description = Some("Ingestion Data Mapping Language"), language = Some("en"))
+  .site
+  .themeColors(
+    primary = Color.hex("C65736"),
+    primaryMedium = Color.hex("E3E2E3"),
+    primaryLight = Color.hex("F4F3F4"),
+    secondary = Color.hex("162341"),
+    text = Color.hex("453E46"),
+    background = Color.hex("FFFFFF"),
+    bgGradient = (Color.hex("162341"), Color.hex("1C2C52"))
+  )
+  .site
+  .topNavigationBar(navLinks =
+    Seq(
+      TextLink.internal(Root / "getting-started.md", "Language Docs"),
+      TextLink.internal(Root / "basic-usage.md", "API Docs"),
+      TextLink.external("https://github.com/idml/idml/releases", "Releases"),
+      IconLink.external("https://github.com/idml/idml", HeliumIcon.github)
+    )
+  )
+  .build
 
-micrositeHomepage := "https://idml.io/"
+// a stable path for publishing, instead of target/out/jvm/scala-<version>/idml-docs/docs/site
+laikaSite / target := baseDirectory.value / "target" / "site"
 
-micrositeOrganizationHomepage := "https://fairhair.ai"
-
-micrositeHighlightTheme := "solarized-light"
-
-micrositeGithubOwner := "idml"
-micrositeGithubRepo := "idml"
-
-micrositePalette := Map(
-        "brand-primary"     -> "#C65736",
-        "brand-secondary"   -> "#162341",
-        "brand-tertiary"    -> "#1c2c52",
-        "gray-dark"         -> "#453E46",
-        "gray"              -> "#837F84",
-        "gray-light"        -> "#E3E2E3",
-        "gray-lighter"      -> "#F4F3F4",
-        "white-color"       -> "#FFFFFF")
-
-micrositeGitterChannel := false
-
-micrositeShareOnSocial := false
-
-micrositeDocumentationUrl := "/user-guide/getting-started.html"
-
-idmlTargetDirectory := resourceManaged.value / "main" / "jekyll"
-
-micrositeConfigYaml := ConfigYml(yamlCustomProperties = Map("highlighter" -> "highlightjs"))
-
-import scala.sys.process._
-lazy val index = taskKey[Unit]("generate index")
-lazy val touchup = taskKey[Unit]("touch up generated html")
-index := {
-  "./docs/generate-index.sh" !
+lazy val index = taskKey[Unit]("regenerate src/main/tut/functions/index.md")
+index := Def.uncached {
+  val functions = IdmlDocSbt.idmlSourceDirectory.value / "functions"
+  val markdown  = Process(Seq("python3", (baseDirectory.value / "generate-index.py").getPath, functions.getPath)).!!
+  IO.write(functions / "index.md", markdown)
 }
-touchup := {
-  "./docs/touchups.sh" !
-}
-makeMicrosite := Def.sequential(index, (makeIdml in Idml), touchup).value
 
+lazy val makeSite = taskKey[Unit]("regenerate the functions index, then build the site into target/site")
+makeSite := Def.uncached(Def.sequential(index, IdmlDocSbt.makeIdml).value)

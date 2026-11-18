@@ -1,8 +1,3 @@
----
-layout: docs
-title: Whirlwind Tour
----
-
 # Whirlwind Tour
 
 ## Assignments
@@ -79,11 +74,11 @@ The format function allows you to format values and concatenate strings with for
     IDML:   x = "%.2g".format(a)
     Output: {"x": "0.00097"}
 
-for other formatting examples, see the [string module](../modules/string.md)
+for other formatting examples, see the [string module](../functions/string.md)
 
 * `match(pattern)`, `split(pattern)`, `replace(search, replace)`, `isMatch(pattern)`,
 
-see the [regex module](../modules/regex.md)
+see the [regex module](../functions/regex.md)
 
 * `seed.random()`
 
@@ -242,7 +237,7 @@ formats the date in the RSS format ([RFC-822, 1036, 1123, 2822](https://tools.ie
     IDML:   mydate = ts.date().rssDate()
     Output: {"mydate": "Sat, 17 Feb 2018 00:47:15 +0000"}
 
-for other date functions, see the [date module](../modules/date.md)
+for other date functions, see the [date module](../functions/date.md)
 
 * `email()`
 
@@ -345,7 +340,7 @@ The standard CSDL logical operators can be used. Operator precedence is currentl
 Mapping rules are delimited by newlines but as long as the line ends with a dot you can continue on to the next line. CSDL filters are not newline sensitive as they begin and end with curly brackets.
 
 ## Blocks
-In the following example,  _[main]_ designates the entry point of the mapping.
+In the following example,  _\[main\]_ designates the entry point of the mapping.
 
     [main]
     twitter            = [not retweeted_status exists].apply("tweet")
@@ -362,7 +357,7 @@ In the following example,  _[main]_ designates the entry point of the mapping.
     id 		           = id_str
     url 	           = place_link
 
-If you want to use blocks then the mapping must have a _[main]_ block which acts as the entry point of hte application. Other templates can be activated with the _apply_ method, which becomes particularly powerful when paired with a CSDL filter.
+If you want to use blocks then the mapping must have a _\[main\]_ block which acts as the entry point of hte application. Other templates can be activated with the _apply_ method, which becomes particularly powerful when paired with a CSDL filter.
 
 ### Scope
 Inside the body of a template:

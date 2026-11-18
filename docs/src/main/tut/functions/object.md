@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Object
-section: language
----
+# Object
 
 Object functions are used to manipulate and work with objects.
 

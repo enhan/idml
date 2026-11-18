@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Core Language
-section: language
----
+# Core Language
 
 ## Assignments
 
@@ -26,11 +22,11 @@ date = created_at.date($DATEFORMAT)
 
 ## Expressions
 
-Expressions are sections of code which can evaluate, these are covered in depth in the [Expressions](expressions.html) section.
+Expressions are sections of code which can evaluate, these are covered in depth in the [Expressions](expressions.md) section.
 
 ## Predicates
 
-Predicates are sections of code which can evaluate to a true or false, and are used for control flow. These are covered in depth in the [Predicates](predicates.html) section.
+Predicates are sections of code which can evaluate to a true or false, and are used for control flow. These are covered in depth in the [Predicates](predicates.md) section.
 
 ## Blocks
 

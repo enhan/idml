@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Email
-section: language
----
+# Email
 
 ## email
 

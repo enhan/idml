@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Geo
-section: language
----
+# Geo
 
 This module is optional and must be included in the list of FunctionResolvers passed to the Ptolemy engine constructor.
 

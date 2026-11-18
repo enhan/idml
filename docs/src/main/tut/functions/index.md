@@ -1,139 +1,131 @@
----
-
-layout: docsplus
-
-title: Functions
-
-section: language
-
----
-
-## object
-
-[serialize](/functions/object.html#serialize)
-
-[keys](/functions/object.html#keys)
-
-[values](/functions/object.html#values)
-
-## maths
-
-[Addition](/functions/maths.html#addition)
-
-[Multiplication](/functions/maths.html#multiplication)
-
-[Division](/functions/maths.html#division)
-
-[Subtraction](/functions/maths.html#subtraction)
-
-[Rounding](/functions/maths.html#rounding)
-
-## email
-
-[email](/functions/email.html#email)
-
-## string
-
-[string](/functions/string.html#string)
-
-[uppercase, lowercase and capitalize](/functions/string.html#uppercase-lowercase-and-capitalize)
-
-[strip](/functions/string.html#strip)
-
-[sha1](/functions/string.html#sha1)
-
-[format](/functions/string.html#format)
+# Functions
 
 ## advanced
 
-[apply and applyArray](/functions/advanced.html#apply-and-applyarray)
+[apply and applyArray](advanced.md#apply-and-applyarray)
 
-[array and extract](/functions/advanced.html#array-and-extract)
+[array and extract](advanced.md#array-and-extract)
 
-[blacklist](/functions/advanced.html#blacklist)
+[blacklist](advanced.md#blacklist)
 
-[average](/functions/advanced.html#average)
+[average](advanced.md#average)
 
-[append](/functions/advanced.html#append)
+[append](advanced.md#append)
 
-[prepend](/functions/advanced.html#prepend)
+[prepend](advanced.md#prepend)
 
-[size](/functions/advanced.html#size)
+[size](advanced.md#size)
 
-[concat](/functions/advanced.html#concat)
-
-## uuid
-
-[uuid3](/functions/uuid.html#uuid3)
-
-[uuid5](/functions/uuid.html#uuid5)
-
-## regex
-
-[match](/functions/regex.html#match)
-
-[matches](/functions/regex.html#matches)
-
-[Split](/functions/regex.html#split)
-
-[Replace](/functions/regex.html#replace)
-
-[isMatch](/functions/regex.html#ismatch)
-
-[multi character match](/functions/regex.html#multi-character-match)
-
-## date
-
-[date](/functions/date.html#date)
-
-[millis](/functions/date.html#millis)
-
-[now](/functions/date.html#now)
-
-[microtime](/functions/date.html#microtime)
-
-[timezone](/functions/date.html#timezone)
-
-## navigation
-
-[get](/functions/navigation.html#get)
-
-[deleted](/functions/navigation.html#deleted)
-
-[indexOf](/functions/navigation.html#indexof)
-
-[slice](/functions/navigation.html#slice)
+[concat](advanced.md#concat)
 
 ## array
 
-[wrapArray](/functions/array.html#wraparray)
+[wrapArray](array.md#wraparray)
 
-[empty](/functions/array.html#empty)
+[empty](array.md#empty)
 
-[unique](/functions/array.html#unique)
+[unique](array.md#unique)
 
-[unique(expression)](/functions/array.html#unique(expression))
+[unique(expression)](array.md#unique-expression)
 
-[combinations](/functions/array.html#combinations)
+[combinations](array.md#combinations)
 
-[sort](/functions/array.html#sort)
+[sort](array.md#sort)
 
-[sort(expression)](/functions/array.html#sort(expression))
+[sort(expression)](array.md#sort-expression)
 
-[flatten](/functions/array.html#flatten)
+[flatten](array.md#flatten)
 
-[combineAll](/functions/array.html#combineall)
+[combineAll](array.md#combineall)
 
-[zip](/functions/array.html#zip)
+[zip](array.md#zip)
+
+## date
+
+[date](date.md)
+
+[millis](date.md#millis)
+
+[now](date.md#now)
+
+[microtime](date.md#microtime)
+
+[timezone](date.md#timezone)
+
+## email
+
+[email](email.md)
+
+## maths
+
+[Addition](maths.md#addition)
+
+[Multiplication](maths.md#multiplication)
+
+[Division](maths.md#division)
+
+[Subtraction](maths.md#subtraction)
+
+[Rounding](maths.md#rounding)
+
+## navigation
+
+[get](navigation.md#get)
+
+[deleted](navigation.md#deleted)
+
+[indexOf](navigation.md#indexof)
+
+[slice](navigation.md#slice)
+
+## object
+
+[serialize](object.md#serialize)
+
+[keys](object.md#keys)
+
+[values](object.md#values)
 
 ## random
 
-[random](/functions/random.html#random)
+[random](random.md)
+
+## regex
+
+[match](regex.md#match)
+
+[matches](regex.md#matches)
+
+[Split](regex.md#split)
+
+[Replace](regex.md#replace)
+
+[isMatch](regex.md#ismatch)
+
+[multi character match](regex.md#multi-character-match)
+
+## schema
+
+## string
+
+[string](string.md)
+
+[uppercase, lowercase and capitalize](string.md#uppercase-lowercase-and-capitalize)
+
+[strip](string.md#strip)
+
+[sha1](string.md#sha1)
+
+[format](string.md#format)
 
 ## url
 
-[url](/functions/url.html#url)
+[url](url.md)
 
-[urls](/functions/url.html#urls)
+[urls](url.md#urls)
 
-## schema
+## uuid
+
+[uuid3](uuid.md#uuid3)
+
+[uuid5](uuid.md#uuid5)

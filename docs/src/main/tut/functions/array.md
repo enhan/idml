@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Array
-section: language
----
+# Array
 
 Functions for manipulating arrays
 

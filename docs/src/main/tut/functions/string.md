@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: String
-section: language
----
+# String
 
 Functions for manipulating strings.
 

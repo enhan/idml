@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Expressions
-section: language
----
+# Expressions
 
 Expressions are the main building block of IDML, they evaluate into values.
 
@@ -131,7 +127,7 @@ my.string  = "%s %s".format(a, b).capitalize()
 
 
 ## Filters
-Filters allow you to filter an array or object using a [predicate](/features/predicates.html):
+Filters allow you to filter an array or object using a [predicate](predicates.md):
 
 ```idml
 twitter.type        = "retweet" [ retweeted_status exists ]

@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Maths
-section: language
----
+# Maths
 
 ## Addition
 

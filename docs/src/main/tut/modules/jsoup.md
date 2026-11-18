@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: jsoup (HTML and XML)
-section: language
----
+# jsoup (HTML and XML)
 
 This module is optional and must be included in the list of FunctionResolvers passed to the Ptolemy engine constructor.
 

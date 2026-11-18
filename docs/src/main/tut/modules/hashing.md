@@ -1,8 +1,4 @@
----
-layout: docsplus
-title: Hashing 
-section: language
----
+# Hashing
 
 The hashing module includes common hashing algorithms which may be called on strings
 
@@ -23,4 +19,4 @@ This module is optional and must be included in the list of FunctionResolvers pa
 | [md5](https://en.wikipedia.org/wiki/MD5)  | `input.md5()`  | 128-bit hex  |
 | [crc32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check)  | `input.crc32()`  | 32-bit hex |
 
-Note: you can use the functions available on strings in the `Maths` set of functions to parse these into integers if you really need to, they are [parseHex](/functions/maths.html#parsehex) and [parseHexUnsigned](/functions/maths.html#parsehexunsigned), you probably want the latter.
+Note: you can use the functions available on strings in the `Maths` set of functions to parse these into integers if you really need to, they are [parseHex](../functions/maths.md#parsehex) and [parseHexUnsigned](../functions/maths.md#parsehexunsigned), you probably want the latter.

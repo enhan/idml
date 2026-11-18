@@ -1,14 +1,10 @@
----
-layout: docsplus
-title: Advanced
-section: language
----
+# Advanced
 
 Advanced functions which resolve differently to normal functions.
 
 ## apply and applyArray
 
-Invokes a [Block](features/core-language.html#blocks) on an item or array of items.
+Invokes a [Block](../features/core-language.md#blocks) on an item or array of items.
 
 ## array and extract
 

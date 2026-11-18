@@ -1,15 +1,11 @@
----
-layout: docsplus
-title: Random
-section: language
----
+# Random
 
 The Random function is used to generate random numbers.
 
 
 ## random
 
-The random function *takes a seed* and a range within which to generate the random number, remember to use a seed which makes sense from your input object [so that replayed data gets the same random number](../user-guide/philosophy.html#determinism).
+The random function *takes a seed* and a range within which to generate the random number, remember to use a seed which makes sense from your input object [so that replayed data gets the same random number](../philosophy.md#determinism).
 
 The seed may be:
 * a string, this is murmurhashed and fed in
