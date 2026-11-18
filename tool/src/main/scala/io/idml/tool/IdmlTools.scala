@@ -23,7 +23,8 @@ import io.idml.circe.IdmlCirce
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
-import org.http4s.server.blaze.BlazeBuilder
+import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.implicits._
 import io.idml.server.WebsocketServer
 import io.idml.utils.Tracer.Annotator
 
@@ -67,8 +68,8 @@ object IdmlTools {
     ) {
       val bindAll = Opts.flag("bind-all", "Bind to all interfaces", short = "b").orFalse
       (bindAll, functionResolver).mapN { case (b, fr) =>
-        BlazeBuilder[IO]
-          .mountService(WebsocketServer.service(fr), "/")
+        BlazeServerBuilder[IO](global)
+          .withHttpApp(WebsocketServer.service(fr).orNotFound)
           .bindHttp(8081, if (b) "0.0.0.0" else "localhost")
           .serve
           .compile

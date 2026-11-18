@@ -9,7 +9,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.2.8" % Test
+  "org.scalatest" %% "scalatest" % "3.2.19" % Test
 )
 
-mainClass in Compile := Some("io.idml.doc.Main")
+Compile / mainClass := Some("io.idml.doc.Main")
