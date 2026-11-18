@@ -5,7 +5,8 @@
 
 See http://idml.io/
 
-Requires Java 17+. See [BUILD.md](BUILD.md) for building.
+Requires Java 17+. The libraries are published for Scala 2.13 and Scala 3, the tool and other applications for Scala 3.
+See [BUILD.md](BUILD.md) for building.
 
 ## History
 
@@ -18,10 +19,10 @@ If you're a member of the `io.idml` namespace on Sonatype Central you can perfor
 or via `SONATYPE_USERNAME` / `SONATYPE_PASSWORD`):
 
 1. add `default-key $KEYID` to `~/.gnupg/gpg.conf` to specify the key to release with
-2. `sbt publishSigned` to stage the signed artifacts in `target/sona-staging`
+2. `sbt +publishSigned` to stage the signed artifacts in `target/sona-staging`
 3. `sbt sonaRelease` to upload and release them (or `sbt sonaUpload` to upload and release manually from the portal)
 4. `sbt tool/assembly` to build the tool jar
-5. get the tool jar from `./target/out/jvm/scala-2.13.18/idml-tool/idml-tool-assembly-$VERSION.jar`
+5. get the tool jar from `./target/out/jvm/scala-3.3.9/idml-tool/idml-tool-assembly-$VERSION.jar`
 6. create a release on github with the format `$VERSION: Title of Release`
 7. Upload the assembly jar to that release and write release notes
 
