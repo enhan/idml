@@ -31,7 +31,7 @@ object IdmlJacksonModule extends IdmlJacksonModule
 
 /** An object that activates the de-serialization of PValues */
 private object PValueDeserializerResolver extends Deserializers.Base {
-  private val pvalue = classOf[IdmlValue]
+  private val pvalue                                 = classOf[IdmlValue]
   override def findBeanDeserializer(
       javaType: JavaType,
       config: DeserializationConfig,
@@ -48,7 +48,7 @@ private object PValueDeserializerResolver extends Deserializers.Base {
 
 /** An object that activates the serialization of PValues */
 private object PValueSerializerResolver extends Serializers.Base {
-  private val pvalue = classOf[IdmlValue]
+  private val pvalue                               = classOf[IdmlValue]
   override def findSerializer(
       config: SerializationConfig,
       theType: JavaType,

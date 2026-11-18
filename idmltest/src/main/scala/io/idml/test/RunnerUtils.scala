@@ -123,7 +123,7 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
         resolved: ResolvedTest[Json],
         output: Json,
         diff: (Json, Json) => String
-    ): List[Either[DifferentOutput, String]] =
+    ): List[Either[DifferentOutput, String]]                                            =
       List(
         Either.cond(
           resolved.output === output,
@@ -134,8 +134,8 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
 
   }
   implicit val multiIdmlRun: IdmlUtils[List[Json]] = new IdmlUtils[List[Json]] {
-    override def run                     = runMulti
-    override def toString(t: List[Json]) = spaces2butDropNulls.print(Json.arr(t: _*))
+    override def run                                                              = runMulti
+    override def toString(t: List[Json])                                          = spaces2butDropNulls.print(Json.arr(t: _*))
     override def validate(
         t: ResolvedTest[List[Json]]): Either[Throwable, ResolvedTest[List[Json]]] =
       Either.cond(
@@ -147,7 +147,7 @@ class RunnerUtils(dynamic: Boolean, plugins: Option[NonEmptyList[URL]]) extends 
         resolved: ResolvedTest[List[Json]],
         output: List[Json],
         diff: (Json, Json) => String
-    ): List[Either[DifferentOutput, String]] = {
+    ): List[Either[DifferentOutput, String]]                                      = {
       (1 to resolved.output.length).zip(resolved.output.zip(output)).map {
         case (index, (expected, actual)) =>
           Either.cond(

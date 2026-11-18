@@ -37,7 +37,7 @@ object PipelinedCode {
   }
   implicit val pipelinedCodeTraverse: Traverse[PipelinedCode] = new Traverse[PipelinedCode] {
     override def traverse[G[_], A, B](fa: PipelinedCode[A])(f: A => G[B])(implicit
-        evidence$1: Applicative[G]): G[PipelinedCode[B]] =
+        evidence$1: Applicative[G]): G[PipelinedCode[B]]                       =
       fa.database.toList
         .traverse { case (k, v) =>
           f(v).tupleLeft(k)
@@ -48,7 +48,7 @@ object PipelinedCode {
     override def foldLeft[A, B](fa: PipelinedCode[A], b: B)(f: (B, A) => B): B =
       fa.database.values.foldLeft(b)(f)
     override def foldRight[A, B](fa: PipelinedCode[A], lb: Eval[B])(
-        f: (A, Eval[B]) => Eval[B]): Eval[B] =
+        f: (A, Eval[B]) => Eval[B]): Eval[B]                                   =
       fa.database.values.foldRight(lb)(f)
   }
 }

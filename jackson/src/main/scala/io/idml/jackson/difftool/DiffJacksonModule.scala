@@ -19,7 +19,7 @@ class DiffJacksonModule extends Module {
 
 /** An object that activates the de-serialization of PValues */
 private object DiffJacksonSerializerResolver extends Serializers.Base {
-  private val pvalue = classOf[IdmlValue]
+  private val pvalue                             = classOf[IdmlValue]
   override def findSerializer(
       config: SerializationConfig,
       theType: JavaType,

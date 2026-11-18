@@ -23,5 +23,5 @@ class IdmlValueNaryFunctionResolver extends FunctionResolver {
       case _                                         => None
 
     }
-  override def providedFunctions(): List[IdmlFunctionMetadata] = List.empty // todo
+  override def providedFunctions(): List[IdmlFunctionMetadata]               = List.empty // todo
 }

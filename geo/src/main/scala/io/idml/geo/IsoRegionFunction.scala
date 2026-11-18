@@ -16,5 +16,5 @@ class IsoRegionFunction(regions: => IdmlValue, val arg1: Pipeline, val arg2: Pip
       region: IdmlValue): IdmlValue = {
     regions.get(country).get(region)
   }
-  override def name: String = "region"
+  override def name: String         = "region"
 }

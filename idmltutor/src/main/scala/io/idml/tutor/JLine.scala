@@ -27,8 +27,10 @@ class JLine[F[_]](name: String, t: Terminal)(implicit F: Sync[F]) {
     .variable(LineReader.SECONDARY_PROMPT_PATTERN, "~> ")
     .history(history)
     .parser(new Parser {
-      override def parse(currentLine: String, currentCursor: Int, context: Parser.ParseContext)
-          : ParsedLine = {
+      override def parse(
+          currentLine: String,
+          currentCursor: Int,
+          context: Parser.ParseContext): ParsedLine = {
         if (!currentLine.endsWith("\n")) {
           throw new EOFError(-1, -1, "gotta end with double enter")
         }
