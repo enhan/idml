@@ -1,6 +1,7 @@
 package io.idml.test
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.{Files, Path, Paths}
+import java.util.Comparator
 import cats.effect.{Blocker, IO, Timer}
 import com.google.re2j.Pattern
 import io.circe.Json
@@ -30,6 +31,15 @@ class RunnerSpec
   class TestRunner extends Runner(false, None, true, blocker)(cs) {
     val printed                          = mutable.Buffer.empty[String]
     override def print(a: Any): IO[Unit] = IO { printed.append(a.toString) }
+  }
+
+  // update tests may rewrite their fixture, and the test classpath can point at src/test/resources,
+  // so they run against a temp copy
+  def withFixtureCopy[A](resource: String)(f: Path => A): A = {
+    val src = Paths.get(getClass.getResource(resource).getFile)
+    val dir = Files.createTempDirectory("idml-runner-spec")
+    try f(Files.copy(src, dir.resolve(src.getFileName)))
+    finally Files.walk(dir).sorted(Comparator.reverseOrder[Path]()).forEach(p => Files.delete(p))
   }
 
   "Runner" should {
@@ -155,16 +165,17 @@ class RunnerSpec
     )
   }
   "be able to tell when a test doesn't need updating" in {
-    val test  = Paths.get(getClass.getResource("/tests/basic.json").getFile)
-    val r     = new TestRunner
-    val state = r.updateTest(false)(cs)(test).unsafeRunSync()
-    state must equal(List(TestState.Success, TestState.Success))
-    r.printed.toList must equal(
-      List(
-        fansi.Color.Green("basic test unchanged").toString(),
-        fansi.Color.Green("basic.json unchanged, not flushing file").toString()
+    withFixtureCopy("/tests/basic.json") { test =>
+      val r     = new TestRunner
+      val state = r.updateTest(false)(cs)(test).unsafeRunSync()
+      state must equal(List(TestState.Success, TestState.Success))
+      r.printed.toList must equal(
+        List(
+          fansi.Color.Green("basic test unchanged").toString(),
+          fansi.Color.Green("basic.json unchanged, not flushing file").toString()
+        )
       )
-    )
+    }
   }
   "be able to update a file that needs updating" in {
     val test     = Files.createTempFile("idml-test", ".json")
@@ -280,28 +291,30 @@ class RunnerSpec
     )
   }
   "be able to filter tests in update" in {
-    val test  = Paths.get(getClass.getResource("/tests/two-tests.json").getFile)
-    val r     = new TestRunner
-    val state = r.updateTest(false, Some(Pattern.compile(".*aaa")))(cs)(test).unsafeRunSync()
-    state must equal(List(TestState.Success, TestState.Success))
-    r.printed.toList must equal(
-      List(
-        fansi.Color.Green("basic test aaa unchanged").toString(),
-        fansi.Color.Green(s"${test.getFileName} unchanged, not flushing file").toString()
+    withFixtureCopy("/tests/two-tests.json") { test =>
+      val r     = new TestRunner
+      val state = r.updateTest(false, Some(Pattern.compile(".*aaa")))(cs)(test).unsafeRunSync()
+      state must equal(List(TestState.Success, TestState.Success))
+      r.printed.toList must equal(
+        List(
+          fansi.Color.Green("basic test aaa unchanged").toString(),
+          fansi.Color.Green(s"${test.getFileName} unchanged, not flushing file").toString()
+        )
       )
-    )
+    }
   }
   "be able to tell when a test with an injected time doesn't need updating" in {
-    val test  = Paths.get(getClass.getResource("/tests/inject-now.json").getFile)
-    val r     = new TestRunner
-    val state = r.updateTest(false)(cs)(test).unsafeRunSync()
-    state must equal(List(TestState.Success, TestState.Success))
-    r.printed.toList must equal(
-      List(
-        fansi.Color.Green("injected now test unchanged").toString(),
-        fansi.Color.Green("inject-now.json unchanged, not flushing file").toString()
+    withFixtureCopy("/tests/inject-now.json") { test =>
+      val r     = new TestRunner
+      val state = r.updateTest(false)(cs)(test).unsafeRunSync()
+      state must equal(List(TestState.Success, TestState.Success))
+      r.printed.toList must equal(
+        List(
+          fansi.Color.Green("injected now test unchanged").toString(),
+          fansi.Color.Green("inject-now.json unchanged, not flushing file").toString()
+        )
       )
-    )
+    }
   }
   "be able to fail validation of a multitest with mismatched arrays" in {
     val test  = Paths.get(getClass.getResource("/tests/bad-multitest.json").getFile)

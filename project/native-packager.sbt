@@ -1,2 +1,2 @@
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.6.1")
-addSbtPlugin("com.typesafe.sbt" % "sbt-git"             % "1.0.0")
+addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.13.0")
+addSbtPlugin("com.github.sbt" % "sbt-git"             % "3.0.0")

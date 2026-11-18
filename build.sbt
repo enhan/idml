@@ -2,85 +2,66 @@ enablePlugins(GitVersioning)
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
 
-import scala.util.Properties
 import sbtassembly.AssemblyPlugin.defaultShellScript
 
 name := "idml-parent"
 
 organization := "io.idml"
 
-publishTo := sonatypePublishToBundle.value
+publishTo := localStaging.value
 
 publishMavenStyle := true
 
 isSnapshot := false
 
-useGpg := true
-
 publishArtifact := false
 
-licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
+licenses := Seq("MIT" -> uri("https://opensource.org/licenses/MIT"))
 
-import xerial.sbt.Sonatype._
+lazy val scala213               = "2.13.18"
+lazy val supportedScalaVersions = List(scala213)
 
-lazy val scala212               = "2.12.13"
-lazy val scala213               = "2.13.5"
-lazy val supportedScalaVersions = List(scala212, scala213)
+ThisBuild / scalaVersion := scala213
+
+// GitVersioning reads this at ThisBuild scope; release tags are plain numbers (2.1.1, not v2.1.1)
+ThisBuild / git.gitTagToVersionNumber := { (tag: String) =>
+  if (tag.matches("[0-9].*")) Some(tag) else None
+}
 
 lazy val commonSettings = Seq(
   organization              := "io.idml",
   crossScalaVersions        := supportedScalaVersions,
   isSnapshot                := false,
   publishArtifact           := true,
-  publishTo                 := sonatypePublishToBundle.value,
-  licenses                  := Seq("MIT" -> url("https://opensource.org/licenses/MIT")),
-  sonatypeProjectHosting    := Some(GitHubHosting("idml", "idml", "opensource@meltwater.com")),
-  sonatypeCredentialHost    := "s01.oss.sonatype.org", // for newer sonatype accounts keep this uncommented
+  publishTo                 := localStaging.value, // sbt 2 built-in Sonatype Central staging, see BUILD.md
+  licenses                  := Seq("MIT" -> uri("https://opensource.org/licenses/MIT")),
+  homepage                  := Some(uri("https://github.com/idml/idml")),
+  scmInfo                   := Some(ScmInfo(uri("https://github.com/idml/idml"), "scm:git:git@github.com:idml/idml.git")),
   developers                := List(
     Developer(
       id = "andimiller",
       name = "Andi Miller",
       email = "andi@andimiller.net",
-      url = url("http://andimiller.net")),
+      url = uri("http://andimiller.net")),
     Developer(
       id = "teamrobin",
       name = "Team Robin",
       email = "teamrobin@meltwater.com",
-      url = url("https://meltwater.com"))
+      url = uri("https://meltwater.com"))
   ),
-  scalacOptions += "-target:jvm-1.8",
+  scalacOptions ++= Seq("-release:17", "-Ymacro-annotations"),
   Docker / version          := version.value,
   Docker / dockerUsername   := Some("idml"),
-  addCompilerPlugin("org.typelevel" % "kind-projector" % "0.11.3" cross CrossVersion.full),
-  scalacOptions ++= {
-    import Ordering.Implicits._
-    if (VersionNumber(scalaVersion.value).numbers >= Seq(2L, 13L)) {
-      List("-Ymacro-annotations")
-    } else {
-      List("-Ypartial-unification")
-    }
-  },
-  libraryDependencies ++= {
-    import Ordering.Implicits._
-    if (VersionNumber(scalaVersion.value).numbers >= Seq(2L, 13L)) {
-      List.empty
-    } else {
-      List(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full))
-    }
-  },
-  javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
-  git.gitTagToVersionNumber := { tag: String =>
-    if (tag matches "[0-9].*") Some(tag) else None
-  }
+  dockerBaseImage           := "eclipse-temurin:17-jre", // pin: native-packager default follows the latest LTS
+  addCompilerPlugin(("org.typelevel" % "kind-projector" % "0.13.4").cross(CrossVersion.full)),
+  javacOptions ++= Seq("--release", "17"),
+  exportJars                := false, // sbt 2 defaults to true; test harnesses read resources as plain files
+  Test / fork               := true,
+  Test / javaOptions ++= Seq("-Duser.language=en", "-Duser.country=US") // tests assert English-formatted output
 )
 
 lazy val lang = project
   .settings(commonSettings)
-  .settings(
-    Antlr4 / antlr4Version     := "4.8-1",
-    Antlr4 / antlr4PackageName := Some("io.idml.lang"),
-    Antlr4 / antlr4GenVisitor  := true
-  )
 
 lazy val datanodes = project.settings(commonSettings)
 
@@ -118,7 +99,6 @@ lazy val geo = project
   .dependsOn(jackson % "test->test")
   .dependsOn(test % "test->test")
   .settings(
-    Test / fork    := true,
     Test / envVars := Map(
       "IDML_GEO_DB_DRIVER"       -> "org.sqlite.JDBC",
       "IDML_GEO_CITY_JDBC_URL"   -> "jdbc:sqlite::resource:cities.test.db",
@@ -157,26 +137,28 @@ lazy val idmld =
 lazy val idmldoc =
   project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(commonSettings)
 
-lazy val `idmldoc-plugin` = project
-  .dependsOn(idmldoc)
-  .settings(commonSettings)
-  .settings(
-    crossScalaVersions := List(scala212)
-  )
+// shortcut: re-enabled in PR C once idmltest/idmldoc build on Scala 3
+//lazy val `idmldoc-plugin` = project
+//  .dependsOn(idmldoc)
+//  .settings(commonSettings)
+//  .settings(
+//    crossScalaVersions := List(scala212)
+//  )
 
 lazy val idmltest =
   project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(commonSettings)
 
-lazy val `idmltest-plugin` = project
-  .dependsOn(idmltest)
-  .dependsOn(hashing)
-  .dependsOn(geo)
-  .dependsOn(jsoup)
-  .dependsOn(jackson)
-  .settings(commonSettings)
-  .settings(
-    crossScalaVersions := List(scala212)
-  )
+// shortcut: re-enabled in PR C once idmltest/idmldoc build on Scala 3
+//lazy val `idmltest-plugin` = project
+//  .dependsOn(idmltest)
+//  .dependsOn(hashing)
+//  .dependsOn(geo)
+//  .dependsOn(jsoup)
+//  .dependsOn(jackson)
+//  .settings(commonSettings)
+//  .settings(
+//    crossScalaVersions := List(scala212)
+//  )
 
 lazy val idmltutor = project
   .dependsOn(hashing)
@@ -189,7 +171,7 @@ lazy val idmltutor = project
     dockerExposedPorts               := Seq(8081),
     Docker / packageName             := "idml",
     Docker / dockerUpdateLatest      := true,
-    assembly / assemblyOption        := (assembly / assemblyOption).value.copy(prependShellScript =
+    assembly / assemblyOption        := (assembly / assemblyOption).value.withPrependShellScript(
       Some(defaultShellScript)),
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", "MANIFEST.MF")                                    => MergeStrategy.discard
@@ -216,7 +198,7 @@ lazy val tool = project
     dockerExposedPorts               := Seq(8081),
     Docker / packageName             := "idml",
     Docker / dockerUpdateLatest      := true,
-    assembly / assemblyOption        := (assembly / assemblyOption).value.copy(prependShellScript =
+    assembly / assemblyOption        := (assembly / assemblyOption).value.withPrependShellScript(
       Some(defaultShellScript)),
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", "MANIFEST.MF")                                    => MergeStrategy.discard

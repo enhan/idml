@@ -87,7 +87,8 @@ object WebsocketServer {
             case Text(msg, _) =>
               Stream.eval(
                 IO {
-                  parse(msg)
+                  _root_.io.circe.parser
+                    .parse(msg)
                     .map(_.as[Request])
                     .leftMap { e =>
                       List(e.message)
