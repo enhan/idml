@@ -1,43 +1,42 @@
 package io.idml.doc
 
-import sbt._
-import microsites._
-import sbt.Keys._
-import com.typesafe.sbt.site.SitePlugin.autoImport.makeSite
-import cats.effect.{Blocker, ContextShift, IO}
+import sbt.*
+import sbt.Keys.*
+import laika.sbt.LaikaPlugin
+import laika.sbt.LaikaPlugin.autoImport.*
+import cats.effect.IO as CatsIO
+import cats.effect.unsafe.implicits.global
 
-import scala.concurrent.ExecutionContext
+/** Copies `idmlSourceDirectory` into `idmlTargetDirectory`, running the IDML code blocks of its
+  * markdown on the way, and makes that the Laika input.
+  */
+object IdmlDocSbt extends AutoPlugin {
 
-object IdmlDocSbt extends AutoPlugin with MicrositeKeys {
+  override def requires = LaikaPlugin
 
-  override def requires = MicrositesPlugin
-
-  lazy val Idml               = (config("Idml") extend Compile).hide
+  lazy val Idml               = config("Idml").extend(Compile).hide
   val makeIdml: TaskKey[Unit] =
-    taskKey[Unit]("Sequential tasks to compile idml and move the result")
+    taskKey[Unit]("Compile the IDML docs and render them into a Laika site")
   val idml: TaskKey[Unit]     = taskKey[Unit]("Compile the IDML")
 
   val idmlTargetDirectory: SettingKey[File] =
-    settingKey[File]("folder to put IDML docs in once they're built")
+    settingKey[File]("folder to put IDML docs in once they're built, added to Laika's sources")
   val idmlSourceDirectory: SettingKey[File] = settingKey[File]("folder to read IDML docs from")
 
-  override val projectSettings = inConfig(Idml)(Defaults.configSettings) ++ Seq(
-    idmlSourceDirectory := (Compile / sourceDirectory).value / "tut",
-    idmlTargetDirectory := resourceManaged.value / "main" / "jekyll",
-    idml                := {
-      implicit val cs: ContextShift[IO] = cats.effect.IO.contextShift(ExecutionContext.global)
-      Blocker[IO]
-        .use { blocker =>
-          Main.processFiles[IO](
-            idmlSourceDirectory.value.toPath,
-            idmlTargetDirectory.value.toPath,
-            blocker)
-        }
-        .unsafeRunSync()
+  override def projectConfigurations: Seq[Configuration] = Seq(Idml)
+
+  override val projectSettings: Seq[Setting[?]] = Seq(
+    idmlSourceDirectory       := (Compile / sourceDirectory).value / "tut",
+    idmlTargetDirectory       := (Compile / resourceManaged).value / "idml-docs",
+    Laika / sourceDirectories := Seq(idmlTargetDirectory.value),
+    idml                      := Def.uncached {
+      val (in, out) = (idmlSourceDirectory.value, idmlTargetDirectory.value)
+      IO.delete(out)
+      IO.copyDirectory(in, out) // non-markdown assets (images, css) go through untouched
+      Main.processFiles[CatsIO](in.toPath, out.toPath).unsafeRunSync()
     },
-    makeIdml            := {
-      Def.sequential(microsite, idml, makeSite)
-    }.value
+    laikaSite                 := laikaSite.dependsOn(idml).value,
+    makeIdml                  := Def.uncached(laikaSite.map(_ => ()).value)
   )
 
 }

@@ -1,15 +1,15 @@
 package io.idml.test
 
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
-import sbt._
-import sbt.Keys._
-import cats.effect._
-import cats._
-import cats.implicits._
+import sbt.*
+import sbt.Keys.*
+import cats.effect.{ExitCode, IO}
+import cats.effect.unsafe.implicits.global
+import cats.implicits.*
 
-import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.global
+import scala.jdk.CollectionConverters.*
+import scala.util.Using
 import scala.util.control.NoStackTrace
 
 object IdmlTestPlugin extends AutoPlugin {
@@ -17,42 +17,39 @@ object IdmlTestPlugin extends AutoPlugin {
     val idmlTest: TaskKey[Unit]             = taskKey[Unit]("run IDML tests")
     val idmlTestDirectory: SettingKey[File] = settingKey[File]("folder to run IDML tests in")
   }
-  import autoImport._
+  import autoImport.*
 
   override val trigger = allRequirements
 
   class TestRunFailed(s: String) extends Throwable(s) with NoStackTrace
 
-  override val projectSettings = Seq(
-    idmlTestDirectory := (sourceDirectory in sbt.Test).value / "idml",
-    (sbt.Test / test) := ((sbt.Test / test) dependsOn idmlTest).value,
-    idmlTest          := {
-      implicit val cs = cats.effect.IO.contextShift(global)
-      val runner      = Blocker[IO].map { b => new Runner(true, None, false, b) }
-      val folder      = idmlTestDirectory.value.toPath
-      println(s"Executing IDML tests in $folder")
-      val tests       = Files
-        .walk(folder)
-        .iterator()
-        .asScala
-        .filter(_.getParent == folder)
-        .filter(_.toString.endsWith(".json"))
-        .toList
-      val run         = runner.use { r =>
-        for {
-          results <- tests.traverse(r.runTest(false)(cs))
-          results2 = results.flatten
-          _       <- r.report(results2)
-          combined = results2.combineAll
-        } yield {
-          TestState.toExitCode(combined) match {
-            case ExitCode.Error       =>
-              throw new TestRunFailed(s"Test run failed, aggregate state is ${combined}")
-            case ExitCode.Success | _ => ()
-          }
-        }
-      }
-      run.unsafeRunSync()
+  // trigger = allRequirements puts this on every project, so a project without an IDML test folder has no tests
+  private def testFiles(folder: Path): IO[List[Path]] =
+    IO.blocking {
+      if (!Files.isDirectory(folder)) Nil
+      else
+        Using.resource(Files.list(folder))(
+          _.iterator().asScala.filter(_.toString.endsWith(".json")).toList.sorted)
+    }
+
+  private def runAll(folder: Path): IO[TestState] = {
+    val runner = new Runner(dynamic = true, plugins = None, jdiff = false)
+    for {
+      _       <- IO.println(s"Executing IDML tests in $folder")
+      files   <- testFiles(folder)
+      results <- files.flatTraverse(runner.runTest(false))
+      _       <- runner.report(results)
+    } yield results.combineAll
+  }
+
+  override val projectSettings: Seq[Setting[?]] = Seq(
+    idmlTestDirectory := (Test / sourceDirectory).value / "idml",
+    Test / test       := (Test / test).dependsOn(idmlTest).evaluated,
+    Test / testFull   := (Test / testFull).dependsOn(idmlTest).value,
+    idmlTest          := Def.uncached {
+      val combined = runAll(idmlTestDirectory.value.toPath).unsafeRunSync()
+      if (TestState.toExitCode(combined) == ExitCode.Error)
+        throw new TestRunFailed(s"Test run failed, aggregate state is $combined")
     }
   )
 

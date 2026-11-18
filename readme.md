@@ -8,6 +8,30 @@ See http://idml.io/
 Requires Java 17+. The libraries are published for Scala 2.13 and Scala 3, the tool and other applications for Scala 3.
 See [BUILD.md](BUILD.md) for building.
 
+## sbt plugins
+
+Both plugins require sbt 2.
+
+- `idmltest-plugin` runs the IDML tests in `src/test/idml/*.json` (`idmlTest`, also run by `test` / `testFull`):
+
+  ```scala
+  // project/plugins.sbt
+  addSbtPlugin("io.idml" % "idmltest-plugin" % "<version>")
+  ```
+
+- `idmldoc-plugin` evaluates the `idml:input` / `idml:code` blocks of the markdown in `src/main/tut` and renders the
+  result as a [Laika](https://typelevel.org/Laika/) site (default Helium theme, the root page is `README.md`):
+
+  ```scala
+  // project/plugins.sbt
+  addSbtPlugin("io.idml" % "idmldoc-plugin" % "<version>")
+  // build.sbt
+  enablePlugins(IdmlDocSbt)
+  ```
+
+  `sbt makeIdml` (or `laikaSite`) writes the site to `(laikaSite / target)`; `laikaPreview` serves it.
+  Laika is configured as usual (`laikaTheme`, `laikaConfig`, ...); `idmlSourceDirectory` changes the input folder.
+
 ## History
 
 IDML has been developed and maintained by [DataSift](https://datasift.com) (now a [Meltwater](https://www.meltwater.com) company), where it's been used to deliver high throughput social media firehoses and to allow customers to onboard data easily.

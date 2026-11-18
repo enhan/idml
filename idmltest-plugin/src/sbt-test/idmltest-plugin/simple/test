@@ -1,0 +1,8 @@
+# a passing IDML test passes, and runs as part of the sbt test tasks (other has no IDML tests)
+> idmlTest
+> testFull
+> other/testFull
+# a failing IDML test fails the build
+$ copy-file fixtures/basic-failed.json src/test/idml/basic-failed.json
+-> idmlTest
+-> testFull

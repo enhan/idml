@@ -72,6 +72,16 @@ lazy val appSettings = commonSettings ++ Seq(
   crossScalaVersions := List(scala3)
 )
 
+// sbt 2 plugins compile with the Scala version sbt itself runs on (3.9.x for sbt 2.1), so they stay
+// out of the 3.3/2.13 cross build: `+compile` / `+publishSigned` build them once, on that version.
+lazy val sbtPluginSettings = commonSettings ++ Seq(
+  scalaVersion       := appConfiguration.value.provider.scalaProvider.version,
+  crossScalaVersions := List(scalaVersion.value),
+  scalacOptions -= "-Ykind-projector", // deprecated on 3.9, and the plugins don't need it
+  scriptedLaunchOpts += s"-Dplugin.version=${version.value}",
+  scriptedBufferLog  := false
+)
+
 lazy val lang = project
   .settings(commonSettings)
 
@@ -149,28 +159,22 @@ lazy val idmld =
 lazy val idmldoc =
   project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(appSettings)
 
-// shortcut: re-enabled in PR C once idmltest/idmldoc build on Scala 3
-//lazy val `idmldoc-plugin` = project
-//  .dependsOn(idmldoc)
-//  .settings(commonSettings)
-//  .settings(
-//    crossScalaVersions := List(scala212)
-//  )
+lazy val `idmldoc-plugin` = project
+  .dependsOn(idmldoc)
+  .enablePlugins(SbtPlugin)
+  .settings(sbtPluginSettings)
 
 lazy val idmltest =
   project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(appSettings)
 
-// shortcut: re-enabled in PR C once idmltest/idmldoc build on Scala 3
-//lazy val `idmltest-plugin` = project
-//  .dependsOn(idmltest)
-//  .dependsOn(hashing)
-//  .dependsOn(geo)
-//  .dependsOn(jsoup)
-//  .dependsOn(jackson)
-//  .settings(commonSettings)
-//  .settings(
-//    crossScalaVersions := List(scala212)
-//  )
+lazy val `idmltest-plugin` = project
+  .dependsOn(idmltest)
+  .dependsOn(hashing)
+  .dependsOn(geo)
+  .dependsOn(jsoup)
+  .dependsOn(jackson)
+  .enablePlugins(SbtPlugin)
+  .settings(sbtPluginSettings)
 
 lazy val idmltutor = project
   .dependsOn(hashing)

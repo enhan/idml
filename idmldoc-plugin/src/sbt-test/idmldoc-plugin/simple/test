@@ -1,0 +1,3 @@
+# makeIdml runs the IDML blocks, then Laika renders the result
+> makeIdml
+> checkSite
