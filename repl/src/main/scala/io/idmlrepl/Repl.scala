@@ -47,6 +47,12 @@ trait JLine[F[_]] {
   }
 }
 
+object Repl {
+  // invalid bytes become U+FFFD; a leading BOM (Windows editors) is dropped, as fs2's utf8Decode did
+  def decodeUtf8(bytes: Array[Byte]): String =
+    new String(bytes, UTF_8).stripPrefix("\uFEFF")
+}
+
 // The pure implementation of the REPL logic
 class Repl[F[_]: Sync](jline: JLine[F])(implicit
     mode: Stateful[F, ReplMode],
@@ -62,7 +68,7 @@ class Repl[F[_]: Sync](jline: JLine[F])(implicit
 
   // F is a StateT stack, which has no Async (so no fs2 Files): read with plain NIO instead
   def loadFile(s: String): F[String] =
-    Sync[F].blocking { new String(Files.readAllBytes(Paths.get(s)), UTF_8) }
+    Sync[F].blocking { Repl.decodeUtf8(Files.readAllBytes(Paths.get(s))) }
 
   def command(s: String): F[Unit] =
     s match {
