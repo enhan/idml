@@ -25,7 +25,7 @@ Requirements: a JDK 17+ (the build is tested with Temurin 25). Bytecode targets 
 - `sbt tool/assembly` builds the self-executing tool jar under
   `target/out/jvm/scala-3.3.9/idml-tool/`.
 
-The ANTLR grammars in `lang/src/main/antlr4` are compiled by a source generator defined in `lang/build.sbt`.
+The ANTLR grammars in `lang/src/main/antlr4` are compiled by a source generator defined on the `lang` project in the root `build.sbt`.
 
 Building the docs site
 ----------------------
