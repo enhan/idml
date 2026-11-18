@@ -5,15 +5,15 @@ env PATH="/opt/sbt/bin:${PATH}"
 copy . /build/
 workdir /build/
 run sbt tool/Docker/stage
-workdir /build/target/out/jvm/scala-2.13.18/idml-tool/docker/stage
+workdir /build/target/out/jvm/scala-3.3.9/idml-tool/docker/stage
 
 FROM amazoncorretto:17-alpine3.18-full
 RUN apk update
 RUN apk add bash
 WORKDIR /opt/docker
 # native-packager 1.13 stages layered dirs: 2 = dependencies, 4 = application + bin
-COPY --from=sbt --chown=daemon:daemon /build/target/out/jvm/scala-2.13.18/idml-tool/docker/stage/2/opt /opt
-COPY --from=sbt --chown=daemon:daemon /build/target/out/jvm/scala-2.13.18/idml-tool/docker/stage/4/opt /opt
+COPY --from=sbt --chown=daemon:daemon /build/target/out/jvm/scala-3.3.9/idml-tool/docker/stage/2/opt /opt
+COPY --from=sbt --chown=daemon:daemon /build/target/out/jvm/scala-3.3.9/idml-tool/docker/stage/4/opt /opt
 EXPOSE 8081
 USER daemon
 ENTRYPOINT ["/opt/docker/bin/idml-tool"]

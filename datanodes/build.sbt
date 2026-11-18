@@ -5,7 +5,7 @@ libraryDependencies ++= Seq(
   "org.joda"         % "joda-convert" % "1.7",       // FIXME: Create date and time plugin
   "javax.mail"       % "mail"         % "1.5.0-b01", // FIXME: Create email plugin
   "com.google.guava" % "guava"        % "27.0-jre",
-  "org.typelevel"   %% "spire"        % "0.17.0",
+  "org.typelevel"   %% "spire"        % "0.18.0",
   "org.typelevel"   %% "cats-core"    % "2.13.0",
   "com.google.re2j"  % "re2j"         % "1.2",
   "org.scalatest"   %% "scalatest"    % "3.2.19" % Test

@@ -6,8 +6,6 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.google.re2j.Pattern
 import io.circe.Json
-import io.circe.generic.auto._
-import io.circe.literal.JsonStringContext
 import io.circe.syntax._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must

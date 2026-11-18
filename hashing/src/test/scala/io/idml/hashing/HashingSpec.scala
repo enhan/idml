@@ -44,7 +44,7 @@ class HashingSpec extends AnyWordSpec with Matchers {
           val ctx = new IdmlContext(IObject("x" -> IString(input)))
           ctx.cursor = ctx.input.get("x")
           HashingFunctions.hashes("xxHash32").invoke(ctx)
-          ctx.cursor.parseHexUnsigned.int must equal(IInt(output))
+          ctx.cursor.parseHexUnsigned().int() must equal(IInt(output))
         }
       }
     }

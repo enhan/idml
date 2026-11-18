@@ -18,10 +18,12 @@ publishArtifact := false
 
 licenses := Seq("MIT" -> uri("https://opensource.org/licenses/MIT"))
 
-lazy val scala213               = "2.13.18"
-lazy val supportedScalaVersions = List(scala213)
+lazy val scala213 = "2.13.18"
+lazy val scala3   = "3.3.9"
 
-ThisBuild / scalaVersion := scala213
+// Libraries cross-build; apps are Scala 3 only. `sbt compile` builds everything on Scala 3,
+// `sbt +compile` / `sbt +testFull` adds the 2.13 build of the libraries.
+ThisBuild / scalaVersion := scala3
 
 // GitVersioning reads this at ThisBuild scope; release tags are plain numbers (2.1.1, not v2.1.1)
 ThisBuild / git.gitTagToVersionNumber := { (tag: String) =>
@@ -30,7 +32,7 @@ ThisBuild / git.gitTagToVersionNumber := { (tag: String) =>
 
 lazy val commonSettings = Seq(
   organization              := "io.idml",
-  crossScalaVersions        := supportedScalaVersions,
+  crossScalaVersions        := List(scala3, scala213),
   isSnapshot                := false,
   publishArtifact           := true,
   publishTo                 := localStaging.value, // sbt 2 built-in Sonatype Central staging, see BUILD.md
@@ -49,15 +51,25 @@ lazy val commonSettings = Seq(
       email = "teamrobin@meltwater.com",
       url = uri("https://meltwater.com"))
   ),
-  scalacOptions ++= Seq("-release:17", "-Xsource:3"),
+  scalacOptions ++= {
+    if (scalaBinaryVersion.value == "3") Seq("-release:17", "-Ykind-projector")
+    else Seq("-release:17", "-Xsource:3")
+  },
   Docker / version          := version.value,
   Docker / dockerUsername   := Some("idml"),
   dockerBaseImage           := "eclipse-temurin:17-jre", // pin: native-packager default follows the latest LTS
-  addCompilerPlugin(("org.typelevel" % "kind-projector" % "0.13.4").cross(CrossVersion.full)),
+  libraryDependencies ++= {
+    if (scalaBinaryVersion.value == "3") Nil
+    else Seq(compilerPlugin(("org.typelevel" % "kind-projector" % "0.13.4").cross(CrossVersion.full)))
+  },
   javacOptions ++= Seq("--release", "17"),
   exportJars                := false, // sbt 2 defaults to true; test harnesses read resources as plain files
   Test / fork               := true,
   Test / javaOptions ++= Seq("-Duser.language=en", "-Duser.country=US") // tests assert English-formatted output
+)
+
+lazy val appSettings = commonSettings ++ Seq(
+  crossScalaVersions := List(scala3)
 )
 
 lazy val lang = project
@@ -122,7 +134,7 @@ lazy val repl = project
   .dependsOn(hashing)
   .dependsOn(circe)
   .dependsOn(utils)
-  .settings(commonSettings)
+  .settings(appSettings)
 
 lazy val idmld =
   project
@@ -132,10 +144,10 @@ lazy val idmld =
     .dependsOn(utils)
     .dependsOn(circe)
     .dependsOn(geo)
-    .settings(commonSettings)
+    .settings(appSettings)
 
 lazy val idmldoc =
-  project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(commonSettings)
+  project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(appSettings)
 
 // shortcut: re-enabled in PR C once idmltest/idmldoc build on Scala 3
 //lazy val `idmldoc-plugin` = project
@@ -146,7 +158,7 @@ lazy val idmldoc =
 //  )
 
 lazy val idmltest =
-  project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(commonSettings)
+  project.dependsOn(core).dependsOn(utils).dependsOn(circe).settings(appSettings)
 
 // shortcut: re-enabled in PR C once idmltest/idmldoc build on Scala 3
 //lazy val `idmltest-plugin` = project
@@ -166,7 +178,7 @@ lazy val idmltutor = project
   .dependsOn(jsoup)
   .dependsOn(circe)
   .dependsOn(idmltest)
-  .settings(commonSettings)
+  .settings(appSettings)
   .settings(
     dockerExposedPorts               := Seq(8081),
     Docker / packageName             := "idml",
@@ -193,7 +205,7 @@ lazy val tool = project
   .dependsOn(idmltutor)
   .dependsOn(geo)
   .enablePlugins(DockerPlugin, JavaAppPackaging)
-  .settings(commonSettings)
+  .settings(appSettings)
   .settings(
     dockerExposedPorts               := Seq(8081),
     Docker / packageName             := "idml",

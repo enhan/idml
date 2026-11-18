@@ -33,9 +33,11 @@ case class IDomElement(name: String, attrs: Map[String, String], children: List[
     )
   def items: mutable.Buffer[IdmlValue]       = children.toBuffer[IdmlValue]
 
-  override lazy val attributes: IObject = IObject(attrs.toList.map { case (k, v) =>
+  // a val can't override an empty-paren def on Scala 3; same bytecode signature as the former lazy val
+  private lazy val attributesObject: IObject = IObject(attrs.toList.map { case (k, v) =>
     k -> IString(v)
   }: _*)
+  override def attributes(): IObject         = attributesObject
 
   // if getting a name, we're actually going to filter the children
   override def get(name: String): IdmlValue =

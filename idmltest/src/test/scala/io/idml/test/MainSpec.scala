@@ -5,8 +5,6 @@ import java.nio.file.Paths
 import cats.effect.{ExitCode, IO, Resource}
 import cats.effect.unsafe.implicits.global
 import io.circe.Json
-import io.circe.generic.auto._
-import io.circe.literal.JsonStringContext
 import io.circe.syntax._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must

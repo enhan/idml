@@ -10,7 +10,6 @@ import com.google.re2j.Pattern
 import io.circe.parser.{parse => parseJson}
 import io.circe.yaml.parser.{parse => parseYaml}
 import io.circe.{Decoder, Encoder, Json}
-import io.circe.generic.auto._
 import io.circe.syntax._
 import fs2._
 import fs2.io.file.{Files, Flags}
@@ -111,9 +110,9 @@ class Runner(dynamic: Boolean, plugins: Option[NonEmptyList[URL]], jdiff: Boolea
                          resolved,
                          output,
                          if (jdiff) { (j1: Json, j2: Json) =>
-                           implicit val lcs = new Patience[Json](true)
+                           implicit val lcs: Lcs[Json] = new Patience[Json](true)
                            import diffson.jsonpatch.lcsdiff._
-                           diff(j1, j2).ops.asJson.spaces2
+                           diff[Json, diffson.jsonpatch.JsonPatch[Json]](j1, j2).ops.asJson.spaces2
                          } else { (j1: Json, j2: Json) =>
                            TestDiff.generateDiff(j1, j2)
                          }

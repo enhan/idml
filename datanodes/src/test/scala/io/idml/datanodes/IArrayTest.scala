@@ -60,7 +60,7 @@ class IArrayTest extends AnyFunSuite with Matchers {
   test("combineAll should fail on an array with multiple types")(
     IArray(IString("hello"), IInt(2)).combineAll() must equal(InvalidCaller))
   test("combineAll should work with a nothing")(
-    IArray(IString("hello"), Filtered, IString("world")).combineAll must equal(
+    IArray(IString("hello"), Filtered, IString("world")).combineAll() must equal(
       IString("helloworld"))
   )
 

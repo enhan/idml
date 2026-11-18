@@ -1,6 +1,8 @@
 package io.idml.test
 
 import io.circe._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax._
 import cats._
 import cats.implicits._
 import cats.data._
@@ -51,8 +53,14 @@ object PipelinedCode {
         f: (A, Eval[B]) => Eval[B]): Eval[B]                                   =
       fa.database.values.foldRight(lb)(f)
   }
+  implicit def decoder[T: Decoder]: Decoder[PipelinedCode[T]] = deriveDecoder
+  implicit def encoder[T: Encoder]: Encoder[PipelinedCode[T]] = deriveEncoder
 }
 final case class Ref(`$ref`: String)
+object Ref           {
+  implicit val decoder: Decoder[Ref] = deriveDecoder
+  implicit val encoder: Encoder[Ref] = deriveEncoder
+}
 final case class Test[F[_], F2[_], T](
     name: String,
     code: F[Either[String, PipelinedCode[F[String]]]],
@@ -74,6 +82,35 @@ object Test {
   type ParsedMultiTest    = ParsedTest[List[Json]]
   type UpdatableMultiTest = UpdatableTest[List[Json]]
   type ResolvedMultiTest  = ResolvedTest[List[Json]]
+
+  // hand-written: circe-generic can't auto-derive the recursive `original` field on Scala 3
+  implicit def parsedTestDecoder[T: Decoder]: Decoder[ParsedTest[T]] = {
+    import CirceEitherEncoders._
+    Decoder.instance { c =>
+      (
+        c.get[String]("name"),
+        c.get[Either[Ref, Either[String, PipelinedCode[Either[Ref, String]]]]]("code"),
+        c.get[Either[Ref, T]]("input"),
+        c.get[Either[Ref, T]]("output"),
+        c.get[Option[Long]]("time"),
+        c.get[Option[ParsedTest[T]]]("original")
+      ).mapN(Test[Either[Ref, *], Either[Ref, *], T])
+    }
+  }
+
+  implicit def parsedTestEncoder[T: Encoder]: Encoder[ParsedTest[T]] = {
+    import CirceEitherEncoders._
+    Encoder.instance { t =>
+      Json.obj(
+        "name"     -> t.name.asJson,
+        "code"     -> t.code.asJson,
+        "input"    -> t.input.asJson,
+        "output"   -> t.output.asJson,
+        "time"     -> t.time.asJson,
+        "original" -> t.original.asJson
+      )
+    }
+  }
 
   def reportErrorWithRef[F[_]: Sync, T](r: Ref, f: F[T]): F[T] =
     f.attempt

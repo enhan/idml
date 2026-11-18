@@ -14,3 +14,5 @@ trait CirceEitherEncoders {
       b: Encoder[B]): Encoder[Either[A, B]] =
     (e: Either[A, B]) => e.bimap(a.apply, b.apply).merge
 }
+
+object CirceEitherEncoders extends CirceEitherEncoders

@@ -7,7 +7,6 @@ import cats.data.{EitherT, NonEmptyList}
 import cats.implicits._
 import cats.effect._
 import io.circe._
-import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.Printer.spaces2
 import io.idml.circe.IdmlCirce

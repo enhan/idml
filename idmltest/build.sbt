@@ -8,9 +8,9 @@ libraryDependencies ++= Seq(
   "io.circe"                      %% "circe-parser"  % "0.14.15",
   "io.circe"                      %% "circe-literal" % "0.14.15" % Test,
   "io.circe"                      %% "circe-yaml"    % "0.16.1",
-  "com.lihaoyi"                   %% "fansi"         % "0.2.13",
+  "com.lihaoyi"                   %% "fansi"         % "0.5.1",
   "org.gnieh"                     %% "diffson-circe" % "4.6.1",
-  "org.tpolecat"                  %% "atto-core"     % "0.9.4",
+  "org.tpolecat"                  %% "atto-core"     % "0.9.5",
   "com.googlecode.java-diff-utils" % "diffutils"     % "1.2.1"
 )
 

@@ -2,8 +2,8 @@ name := "idmltutor"
 
 libraryDependencies ++= List(
   "org.jline"     % "jline"         % "3.13.3",
-  "org.tpolecat" %% "atto-core"     % "0.9.4",
-  "com.lihaoyi"  %% "fansi"         % "0.2.13",
+  "org.tpolecat" %% "atto-core"     % "0.9.5",
+  "com.lihaoyi"  %% "fansi"         % "0.5.1",
   "io.circe"     %% "circe-literal" % "0.14.15"
 )
 
