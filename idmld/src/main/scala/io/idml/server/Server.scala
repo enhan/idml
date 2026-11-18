@@ -8,10 +8,12 @@ import org.http4s.implicits._
 
 object Server extends IOApp {
   def serve(host: Host, fr: FunctionResolverService): IO[ExitCode] =
-    EmberServerBuilder
+    // Ember has no request body limit; WebsocketServer.readCapped stops reading past MaxInputBytes
+    WebsocketServer.warmUp(fr) *> EmberServerBuilder
       .default[IO]
       .withHost(host)
       .withPort(port"8081")
+      .withMaxWebSocketMessageSize(BoundedStack.MaxInputBytes)
       .withHttpWebSocketApp(WebsocketServer.service(fr)(_).orNotFound)
       .build
       .useForever

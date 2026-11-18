@@ -10,5 +10,6 @@ libraryDependencies ++= Seq(
   "org.http4s"    %% "http4s-ember-server" % http4sVersion,
   "io.circe"      %% "circe-generic"       % circeVersion,
   "io.circe"      %% "circe-parser"        % circeVersion,
-  "ch.qos.logback" % "logback-classic"     % "1.0.1"
+  "ch.qos.logback" % "logback-classic"     % "1.0.1",
+  "org.scalatest" %% "scalatest"           % "3.2.19" % Test
 )

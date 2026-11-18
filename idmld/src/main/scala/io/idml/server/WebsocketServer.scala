@@ -66,58 +66,96 @@ object WebsocketServer {
       case GET -> Root / "functions" / partial =>
         Ok(functions.filter(_.name.startsWith(partial)).asJson)
       case req @ POST -> Root / "completion"   =>
-        req
-          .as[Complete]
-          .map { c =>
-            c.in.flatMap { doc =>
-              AutoComplete.complete(completionIdml)(doc, c.idml, c.position)
-            }.asJson
-          }
-          .flatMap(Ok(_))
+        readCapped(req)
+          .flatMap(_.fold(e => IO.pure(Left(e)), BoundedStack.run(_)(complete)))
+          .flatMap(_.fold(e => BadRequest(Response(None, Some(e)).asJson), Ok(_)))
 
-      case req @ GET -> Root =>
-        val main: Pipe[IO, WebSocketFrame, Response] = _.flatMap {
-          _ match {
-            case Text(msg, _) =>
-              Stream.eval(
-                IO {
-                  _root_.io.circe.parser
-                    .parse(msg)
-                    .map(_.as[Request])
-                    .leftMap { e =>
-                      List(e.message)
-                    }
-                    .map { r =>
-                      r.toTry.toEither.leftMap(e => List(e.getMessage))
-                    }
-                    .flatMap(identity)
-                    .flatMap { x =>
-                      Try {
-                        log.info(x.toString)
-                        val chain = idml.compile(x.idml)
-                        val jsons = x.in
-                        val p     = x.path.getOrElse("root")
-                        val path  = idml.compile(s"result = $p")
-                        jsons.map { j =>
-                          Try { path.run(chain.run(j)).asJson }.toEither
-                        }.sequence
-                      }.toEither
-                        .leftMap(e => List(e.getMessage))
-                        .flatMap(_.toTry.toEither.leftMap(e => List(e.getMessage)))
-                    }
-                    .map(result => Response(Some(result), None))
-                    .leftMap(e => Response(None, Some(e)))
-                    .merge
-                }
-              )
-            case _            =>
-              Stream.emit(Response(None, Some(List("Please send your request as Text")))).covary[IO]
-          }
+      case GET -> Root =>
+        val main: Pipe[IO, WebSocketFrame, String] = _.evalMap {
+          case Text(msg, _) => handleText(idml)(msg)
+          case _            => IO.pure(render(Left(List("Please send your request as Text"))))
         }
 
-        wsb.build(main.andThen(_.map(resp => Text(resp.asJson.toString()))))
+        wsb
+          .withMaxMessageSize(BoundedStack.MaxInputBytes.toLong)
+          .build(main.andThen(_.map(Text(_))))
 
     }
   }
+
+  /** Answers one websocket text message; never fails, errors are part of the rendered response. */
+  def handleText(idml: Idml)(msg: String): IO[String] =
+    BoundedStack
+      .run(msg)(m => Right(render(evaluate(idml)(m))))
+      .map(_.fold(e => render(Left(e)), identity))
+
+  /** Runs one small mapping and completion through the request path at startup, so that common
+    * classes get initialised on a shallow stack rather than first inside a hostile deep request.
+    */
+  def warmUp(fr: FunctionResolverService): IO[Unit] =
+    for {
+      mapped    <- handleText(new IdmlBuilder(fr).build())(WarmUpMapping)
+      completed <- BoundedStack.run(WarmUpCompletion)(complete)
+    } yield log.info(s"Warm-up done: $mapped ${completed.fold(_.mkString, _.noSpaces)}")
+
+  private[server] val WarmUpMapping =
+    """{"in":[{"a":"x","n":[1,2]}],"idml":"b = a.uppercase()\nc = n.map(this + 1)\nd = {\"k\": a}","path":"root"}"""
+
+  private[server] val WarmUpCompletion =
+    """{"in":[{"a":1}],"idml":"result = root.","position":14}"""
+
+  private def render(result: Either[List[String], List[Json]]): String =
+    result
+      .fold(e => Response(None, Some(e)), out => Response(Some(out), None))
+      .asJson
+      .toString()
+
+  private def evaluate(idml: Idml)(msg: String): Either[List[String], List[Json]] =
+    _root_.io.circe.parser
+      .decode[Request](msg)
+      .leftMap(e => List(e.getMessage))
+      .filterOrElse(x => !(x.idml :: x.path.toList).exists(tooDeep), BoundedStack.TooDeep)
+      .flatMap { x =>
+        Try {
+          log.debug("Request: {}", x)
+          val chain = idml.compile(x.idml)
+          val p     = x.path.getOrElse("root")
+          val path  = idml.compile(s"result = $p")
+          x.in.map { j =>
+            Try { path.run(chain.run(j)).asJson }.toEither
+          }.sequence
+        }.toEither
+          .leftMap(e => List(e.getMessage))
+          .flatMap(_.leftMap(e => List(e.getMessage)))
+      }
+
+  private def complete(body: String): Either[List[String], Json] =
+    _root_.io.circe.parser
+      .decode[Complete](body)
+      .leftMap(e => List(e.getMessage))
+      .filterOrElse(c => !tooDeep(c.idml), BoundedStack.TooDeep)
+      .flatMap { c =>
+        Try {
+          c.in.flatMap { doc =>
+            AutoComplete.complete(completionIdml)(doc, c.idml, c.position)
+          }.asJson
+        }.toEither.leftMap(e => List(e.getMessage))
+      }
+
+  private def tooDeep(idml: String): Boolean =
+    BoundedStack.idmlNestingDepth(idml) > BoundedStack.MaxNestingDepth
+
+  // reads at most one byte past the limit, so an oversized body is never fully buffered
+  private def readCapped(req: org.http4s.Request[IO]): IO[Either[List[String], String]] =
+    req.body
+      .take(BoundedStack.MaxInputBytes.toLong + 1)
+      .compile
+      .to(Array)
+      .map { bytes =>
+        Either.cond(
+          bytes.length <= BoundedStack.MaxInputBytes,
+          new String(bytes, java.nio.charset.StandardCharsets.UTF_8),
+          BoundedStack.TooLarge)
+      }
 
 }
