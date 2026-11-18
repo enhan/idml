@@ -82,6 +82,16 @@ lazy val sbtPluginSettings = commonSettings ++ Seq(
   scriptedBufferLog  := false
 )
 
+// Explicit root: `crossScalaVersions := Nil` keeps it out of every `+` pass, so `+cmd` runs each module only at its
+// own versions (an implicit root on 3.3.9 would re-run the aggregated plugins, and publish them twice).
+lazy val root = Project("idml-root", file("."))
+  .aggregate(lang, datanodes, jackson, circe, core, test, geo, jsoup, hashing, utils, repl, idmld, idmldoc,
+    `idmldoc-plugin`, idmltest, `idmltest-plugin`, idmltutor, tool)
+  .settings(
+    crossScalaVersions := Nil,
+    publish / skip     := true
+  )
+
 lazy val lang = project
   .settings(commonSettings)
 

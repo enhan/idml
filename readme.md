@@ -30,7 +30,10 @@ Both plugins require sbt 2.
   ```
 
   `sbt makeIdml` (or `laikaSite`) writes the site to `(laikaSite / target)`; `laikaPreview` serves it.
-  Laika is configured as usual (`laikaTheme`, `laikaConfig`, ...); `idmlSourceDirectory` changes the input folder.
+  Laika is configured as usual (`laikaTheme`, `laikaConfig`, ...); `IdmlDocSbt.idmlSourceDirectory` changes the input
+  folder. The plugin replaces Laika's default source directory (`src/docs`) with the generated
+  `IdmlDocSbt.idmlTargetDirectory`, which every Laika task regenerates first; `laikaPreview` does so once at startup,
+  so restart it after editing the markdown.
 
 ## History
 

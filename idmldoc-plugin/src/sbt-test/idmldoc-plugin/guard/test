@@ -1,0 +1,7 @@
+# a target directory containing the project is refused before anything is deleted
+# the build loads (so the failure below is the guard, not a broken build.sbt)
+> idmlTargetDirectory
+-> makeIdml
+$ exists sentinel.txt
+$ exists src/main/tut/README.md
+$ exists build.sbt
