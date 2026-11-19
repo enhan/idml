@@ -8,6 +8,10 @@ See http://idml.io/
 Requires Java 17+. The libraries are published for Scala 2.13 and Scala 3, the tool and other applications for Scala 3.
 See [BUILD.md](BUILD.md) for building.
 
+`idml-core` logs through slf4j-api 2.x, so applications need an slf4j-2-compatible backend (logback 1.3+,
+`log4j-slf4j2-impl`, slf4j-simple 2.x, ...); an slf4j 1.x binding is ignored (slf4j prints a
+warning and falls back to NOP logging).
+
 ## sbt plugins
 
 Both plugins require sbt 2.

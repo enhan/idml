@@ -209,7 +209,7 @@ lazy val core: Project = project
   .settings(
     name             := "idml-core",
     libraryDependencies ++= Seq(
-      "org.slf4j"          % "slf4j-api"    % "1.7.36",
+      "org.slf4j"          % "slf4j-api"    % "2.0.20",
       "org.tpolecat"      %% "atto-core"    % attoVersion,
       "org.scalatest"     %% "scalatest"    % scalatestVersion            % Test,
       "org.scalatestplus" %% "mockito-5-18" % scalatestplusMockitoVersion % Test
@@ -330,7 +330,7 @@ lazy val idmld = project
       "org.http4s"    %% "http4s-ember-server" % http4sVersion,
       "io.circe"      %% "circe-generic"       % circeVersion,
       "io.circe"      %% "circe-parser"        % circeVersion,
-      "ch.qos.logback" % "logback-classic"     % "1.2.13",
+      "ch.qos.logback" % "logback-classic"     % "1.5.38",
       "org.scalatest" %% "scalatest"           % scalatestVersion % Test
     )
   )
@@ -460,6 +460,8 @@ lazy val tool = project
       case PathList("buildinfo/BuildInfo$.class")                                 => MergeStrategy.first
       case PathList("META-INF", "services", "io.idml.functions.FunctionResolver") =>
         MergeStrategy.concat
+      case PathList("META-INF", "services", "org.slf4j.spi.SLF4JServiceProvider") =>
+        MergeStrategy.concat // logback is the only provider; concat makes a second one visible as an slf4j warning
       case _                                                                      => MergeStrategy.first
     }
   )
