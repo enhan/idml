@@ -33,13 +33,11 @@ class PValueDeserializer(factory: TypeFactory, klass: Class[_]) extends JsonDese
       case JsonToken.FIELD_NAME | JsonToken.END_OBJECT =>
         fieldNameOrEndObject(jp, ctxt)
 
-      case _ => throw ctxt.mappingException(classOf[IdmlValue])
+      case _ => ctxt.handleUnexpectedToken(classOf[IdmlValue], jp)
     }
 
-    if (!klass.isAssignableFrom(value.getClass))
-      throw ctxt.mappingException(klass)
-
-    value
+    if (klass.isAssignableFrom(value.getClass)) value
+    else ctxt.handleUnexpectedToken(klass, jp)
   }
 
   def startObject(jp: JsonParser, ctxt: DeserializationContext): Object = {

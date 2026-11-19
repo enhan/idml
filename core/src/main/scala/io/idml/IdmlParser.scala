@@ -4,7 +4,7 @@ import java.io.{InputStream, Reader}
 
 import io.idml.lang.{DocumentParseException, MappingLexer, MappingParser, ThrowConsoleErrorListener}
 import io.idml.ast.AstGenerator
-import org.antlr.v4.runtime.{CharStream, CharStreams, CommonTokenStream}
+import org.antlr.v4.runtime.{ANTLRInputStream, CharStream, CharStreams, CommonTokenStream}
 
 /** Parses Idml documents
   */
@@ -27,6 +27,11 @@ class IdmlParser {
   def parse(funcs: FunctionResolverService, in: InputStream): IdmlMapping = {
     parse(funcs, CharStreams.fromStream(in))
   }
+
+  /** Kept for binary compatibility with 2.1.x */
+  @deprecated("use the CharStream overload", "2.2.0")
+  def parse(funcs: FunctionResolverService, in: ANTLRInputStream): IdmlMapping =
+    parse(funcs, in: CharStream)
 
   /** Create an execution tree from any ANTLR input stream */
   @throws[DocumentParseException]("if it fails to parse the document")

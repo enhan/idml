@@ -44,4 +44,12 @@ class JsoupElementTest extends AnyFunSuite with Matchers {
       IString("not mehelloworld"))
   }
 
+  test("parseXml lower-cases tag and attribute names") {
+    // compare name/attrs directly: IdmlValue equality treats any two empty elements as equal
+    IdmlJsoup.parseXml("<R><Mixed Case='Y'/></R>").get("r").get(0).get("mixed").get(0) match {
+      case IDomElement(name, attrs, _) => (name, attrs) must equal(("mixed", Map("case" -> "Y")))
+      case other                       => fail(s"expected an element, got $other")
+    }
+  }
+
 }

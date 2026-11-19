@@ -36,6 +36,8 @@ lazy val attoVersion                 = "0.9.5"
 lazy val fansiVersion                = "0.5.1"
 lazy val jlineVersion                = "3.30.17"
 lazy val http4sVersion               = "0.23.39"
+// pins the jackson that json4s-jackson 4.0.7 brings (2.12.7: CVE-2022-42003/42004, CVE-2025-52999)
+lazy val jacksonVersion              = "2.18.12"
 
 // GitVersioning reads this at ThisBuild scope; release tags are plain numbers (2.1.1, not v2.1.1)
 ThisBuild / git.gitTagToVersionNumber := { (tag: String) =>
@@ -177,8 +179,11 @@ lazy val jackson: Project = project
   .settings(
     name := "idml-jackson",
     libraryDependencies ++= List(
-      "org.json4s"    %% "json4s-jackson" % "4.0.7",
-      "org.scalatest" %% "scalatest"      % scalatestVersion % Test
+      "org.json4s"                %% "json4s-jackson"      % "4.0.7",
+      "com.fasterxml.jackson.core" % "jackson-core"        % jacksonVersion,
+      "com.fasterxml.jackson.core" % "jackson-databind"    % jacksonVersion,
+      "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+      "org.scalatest"             %% "scalatest"           % scalatestVersion % Test
     )
   )
 
