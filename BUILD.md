@@ -41,7 +41,8 @@ the local Ivy repository. From the repository root:
 
 The first command publishes the plugin and the modules it depends on under the fixed version `0.0.0-docs`, the one
 `docs/project/plugins.sbt` expects (pass `-Dplugin.version=<version>` to the docs build to use another one). Rerun it
-after changing the language or the plugin. `makeSite` regenerates the functions index
+after changing the language or the plugin, and delete `docs/target` too when their dependencies changed: the docs
+build caches the plugin's dependency resolution for an unchanged version. `makeSite` regenerates the functions index
 (`docs/src/main/tut/functions/index.md`, with `docs/generate-index.py`, needs `python3`) and writes the site to
 `docs/target/site`; Laika fails the build on broken internal links. `sbt laikaPreview` in `docs/` serves the site
 locally. Navigation order and section titles live in the `directory.conf` files next to the pages, and the theme

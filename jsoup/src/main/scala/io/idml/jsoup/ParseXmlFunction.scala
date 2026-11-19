@@ -6,7 +6,7 @@ import io.idml.{IdmlContext, InvalidCaller}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 
 object ParseXmlFunction extends IdmlFunction {
   override def name: String = "parseXml"

@@ -6,7 +6,7 @@ import io.idml.ast.{IdmlFunction, Pipeline}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 
 object StripTagsFunction extends IdmlFunction {
   override def name: String = "stripTags"
@@ -16,11 +16,7 @@ object StripTagsFunction extends IdmlFunction {
       case IString(str) =>
         IString(
           Parser.unescapeEntities(
-            Jsoup.clean(
-              str,
-              "",
-              Whitelist.none(),
-              new Document.OutputSettings().prettyPrint(false)),
+            Jsoup.clean(str, "", Safelist.none(), new Document.OutputSettings().prettyPrint(false)),
             false
           )
         )

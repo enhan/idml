@@ -26,16 +26,16 @@ lazy val scala3   = "3.3.9"
 ThisBuild / scalaVersion := scala3
 
 // Versions shared by several modules
-lazy val scalatestVersion            = "3.2.19"
+lazy val scalatestVersion            = "3.2.20"
 lazy val scalatestplusMockitoVersion = "3.2.19.0"
-lazy val circeVersion                = "0.14.15"
+lazy val circeVersion                = "0.14.17"
 lazy val catsEffectVersion           = "3.7.1"
-lazy val fs2Version                  = "3.15.0"
+lazy val fs2Version                  = "3.16.0"
 lazy val declineVersion              = "2.6.2"
 lazy val attoVersion                 = "0.9.5"
 lazy val fansiVersion                = "0.5.1"
-lazy val jlineVersion                = "3.13.3"
-lazy val http4sVersion               = "0.23.38"
+lazy val jlineVersion                = "3.30.17"
+lazy val http4sVersion               = "0.23.39"
 
 // GitVersioning reads this at ThisBuild scope; release tags are plain numbers (2.1.1, not v2.1.1)
 ThisBuild / git.gitTagToVersionNumber := { (tag: String) =>
@@ -132,7 +132,7 @@ lazy val lang = project
     name := "idml-lang",
     libraryDependencies ++= Seq(
       "org.antlr"        % "antlr4-runtime" % "4.13.2", // BSD license, keep in sync with project/antlr4.sbt
-      "com.google.guava" % "guava"          % "27.0-jre", // Apache License 2
+      "com.google.guava" % "guava"          % "33.8.0-jre", // Apache License 2
       "org.scalatest"   %% "scalatest"      % scalatestVersion % Test // Apache License 2
     ),
     // Replaces sbt-antlr4 (no sbt 2 release): runs the ANTLR tool from the meta-build classpath.
@@ -160,13 +160,13 @@ lazy val datanodes = project
   .settings(
     name := "idml-datanodes",
     libraryDependencies ++= Seq(
-      "joda-time"        % "joda-time"    % "2.9.9", // FIXME: Create date and time plugin
-      "org.joda"         % "joda-convert" % "1.7", // FIXME: Create date and time plugin
-      "javax.mail"       % "mail"         % "1.5.0-b01", // FIXME: Create email plugin
-      "com.google.guava" % "guava"        % "27.0-jre",
+      "joda-time"        % "joda-time"    % "2.15.1", // FIXME: Create date and time plugin
+      "org.joda"         % "joda-convert" % "2.2.4", // FIXME: Create date and time plugin
+      "com.sun.mail"     % "javax.mail"   % "1.6.2", // FIXME: Create email plugin
+      "com.google.guava" % "guava"        % "33.8.0-jre",
       "org.typelevel"   %% "spire"        % "0.18.0",
       "org.typelevel"   %% "cats-core"    % "2.13.0",
-      "com.google.re2j"  % "re2j"         % "1.2",
+      "com.google.re2j"  % "re2j"         % "1.8",
       "org.scalatest"   %% "scalatest"    % scalatestVersion % Test
     )
   )
@@ -177,7 +177,7 @@ lazy val jackson: Project = project
   .settings(
     name := "idml-jackson",
     libraryDependencies ++= List(
-      "org.json4s"    %% "json4s-jackson" % "4.0.3",
+      "org.json4s"    %% "json4s-jackson" % "4.0.7",
       "org.scalatest" %% "scalatest"      % scalatestVersion % Test
     )
   )
@@ -204,7 +204,7 @@ lazy val core: Project = project
   .settings(
     name             := "idml-core",
     libraryDependencies ++= Seq(
-      "org.slf4j"          % "slf4j-api"    % "1.7.26",
+      "org.slf4j"          % "slf4j-api"    % "1.7.36",
       "org.tpolecat"      %% "atto-core"    % attoVersion,
       "org.scalatest"     %% "scalatest"    % scalatestVersion            % Test,
       "org.scalatestplus" %% "mockito-5-18" % scalatestplusMockitoVersion % Test
@@ -257,7 +257,7 @@ lazy val jsoup = project
   .settings(
     name := "idml-jsoup",
     libraryDependencies ++= Seq(
-      "org.jsoup"      % "jsoup"     % "1.8.1",
+      "org.jsoup"      % "jsoup"     % "1.24.1",
       "org.scalatest" %% "scalatest" % scalatestVersion % Test
     )
   )
@@ -268,8 +268,8 @@ lazy val hashing = project
   .settings(
     name := "idml-hashing",
     libraryDependencies ++= Seq(
-      "net.openhft"    % "zero-allocation-hashing" % "0.8",
-      "org.lz4"        % "lz4-java"                % "1.8.0",
+      "net.openhft"    % "zero-allocation-hashing" % "2026.0",
+      "at.yawk.lz4"    % "lz4-java"                % "1.14.1",
       "org.scalatest" %% "scalatest"               % scalatestVersion % Test
     )
   )
@@ -302,7 +302,7 @@ lazy val repl = project
       "com.lihaoyi"   %% "fansi"              % fansiVersion,
       "org.jline"      % "jline-terminal-jna" % jlineVersion,
       "org.jline"      % "jline-reader"       % jlineVersion,
-      "org.mockito"    % "mockito-all"        % "1.9.5"          % Test,
+      "org.mockito"    % "mockito-all"        % "1.10.19"        % Test,
       "org.scalatest" %% "scalatest"          % scalatestVersion % Test
     ),
     Compile / mainClass := Some("io.idmlrepl.Main")
@@ -325,7 +325,7 @@ lazy val idmld = project
       "org.http4s"    %% "http4s-ember-server" % http4sVersion,
       "io.circe"      %% "circe-generic"       % circeVersion,
       "io.circe"      %% "circe-parser"        % circeVersion,
-      "ch.qos.logback" % "logback-classic"     % "1.0.1",
+      "ch.qos.logback" % "logback-classic"     % "1.2.13",
       "org.scalatest" %% "scalatest"           % scalatestVersion % Test
     )
   )
@@ -373,9 +373,9 @@ lazy val idmltest = project
       "io.circe"                      %% "circe-literal" % circeVersion     % Test,
       "io.circe"                      %% "circe-yaml"    % "0.16.1",
       "com.lihaoyi"                   %% "fansi"         % fansiVersion,
-      "org.gnieh"                     %% "diffson-circe" % "4.6.1",
+      "org.gnieh"                     %% "diffson-circe" % "4.7.1",
       "org.tpolecat"                  %% "atto-core"     % attoVersion,
-      "com.googlecode.java-diff-utils" % "diffutils"     % "1.2.1",
+      "com.googlecode.java-diff-utils" % "diffutils"     % "1.3.0",
       "org.scalatest"                 %% "scalatest"     % scalatestVersion % Test
     ),
     Compile / mainClass := Some("io.idml.test.Main")
@@ -409,7 +409,7 @@ lazy val idmltutor = project
       "io.circe"     %% "circe-literal" % circeVersion
     ),
     libraryDependencies ++= Seq(
-      "org.mockito"    % "mockito-all" % "1.9.5"          % Test,
+      "org.mockito"    % "mockito-all" % "1.10.19"        % Test,
       "org.scalatest" %% "scalatest"   % scalatestVersion % Test
     ),
     Compile / mainClass              := Some("io.idml.tutor.Main"),
