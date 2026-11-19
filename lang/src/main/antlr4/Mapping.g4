@@ -1,7 +1,8 @@
 grammar Mapping;
 
-document : section* |
-           mapping*;
+// EOF: ANTLR 4.5's prediction rejected trailing garbage on its own; 4.6+ stops at it silently
+document : (section* |
+            mapping*) EOF;
 
 section : header mapping*;
 

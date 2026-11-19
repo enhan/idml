@@ -3,7 +3,7 @@ package io.idmlrepl
 import java.util
 
 import io.idml.lang.MappingLexer
-import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import org.jline.reader.{CompletingParsedLine, ParsedLine}
 import scala.collection.JavaConverters._
 
@@ -11,7 +11,7 @@ object Lexer {
   // This repurposes the existing ANTLR lexer to be used for jline
   def apply(s: String, pointer: Int): ParsedLine = {
     val c            = pointer - 1
-    val lexer        = new MappingLexer(new ANTLRInputStream(s))
+    val lexer        = new MappingLexer(CharStreams.fromString(s))
     val stream       = new CommonTokenStream(lexer)
     stream.fill()
     val tokens       = stream.getTokens.asScala.toList

@@ -11,7 +11,7 @@ class MappingTestBase extends AnyFunSuite with Matchers {
   def test(filename: String): Unit = {
     super.test("Parsing " + filename) {
       val str    = Resources.toString(Resources.getResource(filename), Charset.defaultCharset())
-      val input  = new ANTLRInputStream(str)
+      val input  = CharStreams.fromString(str)
       val lexer  = new MappingLexer(input)
       val tokens = new CommonTokenStream(lexer)
       val parser = new MappingParser(tokens)

@@ -20,4 +20,8 @@ class IdmlParserTest extends AnyFunSuite with MockitoSugar {
   test("Throws parse error when input is invalid") {
     intercept[DocumentParseException](new IdmlParser().parse(null, ":-D"))
   }
+
+  test("Throws parse error on trailing input after a valid mapping") {
+    intercept[DocumentParseException](new IdmlParser().parse(null, "r = a.("))
+  }
 }

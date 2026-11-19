@@ -131,7 +131,7 @@ lazy val lang = project
   .settings(
     name := "idml-lang",
     libraryDependencies ++= Seq(
-      "org.antlr"        % "antlr4-runtime" % "4.5", // BSD license, keep in sync with project/antlr4.sbt
+      "org.antlr"        % "antlr4-runtime" % "4.13.2", // BSD license, keep in sync with project/antlr4.sbt
       "com.google.guava" % "guava"          % "27.0-jre", // Apache License 2
       "org.scalatest"   %% "scalatest"      % scalatestVersion % Test // Apache License 2
     ),
